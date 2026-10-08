@@ -78,6 +78,5 @@ A production-grade movie ticket booking platform where users can discover movies
 
 ---
 
-## 📄 License
 
 This project was built for academic purposes.
