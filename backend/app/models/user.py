@@ -67,7 +67,7 @@ class User(Timestamp, Base):
     role: Mapped[Role] = mapped_column(
         SAEnum(Role, name="user_role_enum"),
         nullable=False,
-        default=Role.VIEWER,
+        default=Role.CUSTOMER,
         server_default=text("'VIEWER'"),
     )
 

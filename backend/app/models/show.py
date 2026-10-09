@@ -12,7 +12,7 @@ Dependencies:
 import enum
 from datetime import datetime
 from decimal import Decimal
-
+from app.schemas.show import ShowStatus
 from sqlalchemy import (
     CheckConstraint,
     Enum as SAEnum,
@@ -30,11 +30,6 @@ from app.core.database import Base
 from app.models.time_stamp import Timestamp
 from app.models.catalog import SeatType
 from app.models.catalog import Movie, Screen
-
-class ShowStatus(str, enum.Enum):
-    SCHEDULED = "SCHEDULED"
-    CANCELLED = "CANCELLED"
-    COMPLETED = "COMPLETED"
 
 
 class Show(Timestamp, Base):
