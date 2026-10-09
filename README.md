@@ -1,7 +1,7 @@
 # MovieBookingSystem
 Production-grade movie ticket booking system with role-based access (User, Theatre Admin, Root Admin), city-wise movie and theatre discovery, show scheduling, NumPy-backed seat grid with locking, simulated payments, e-tickets and revenue dashboards. Built with FastAPI, Streamlit and SQL.
 
-# 🎬 Movie Ticket Booking System
+# Movie Ticket Booking System
 
 A production-grade movie ticket booking platform where users can discover movies by city, pick a theatre and show, choose seats from a visual grid, pay, and download their tickets. Theatre admins run their own theatres and schedules, while a root admin governs cities, theatres and the movie catalog.
 
@@ -9,7 +9,7 @@ A production-grade movie ticket booking platform where users can discover movies
 
 ---
 
-## ✨ Features
+## Features
 
 ### For Users
 - **Signup and Login** with email and password, JWT-based sessions, account lockout after repeated failed attempts, and 30-minute inactivity timeout
@@ -38,7 +38,7 @@ A production-grade movie ticket booking platform where users can discover movies
 
 ---
 
-## 🧱 Modules
+## Modules
 
 | Module | Description |
 |---|---|
@@ -51,7 +51,7 @@ A production-grade movie ticket booking platform where users can discover movies
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -66,7 +66,7 @@ A production-grade movie ticket booking platform where users can discover movies
 
 
 
-## 👥 Team (Group G4)
+## Team (Group G4)
 
 | Member | Module |
 |---|---|
