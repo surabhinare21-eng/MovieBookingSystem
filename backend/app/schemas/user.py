@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from typing import List, Dict, Annotated, Optional
 from datetime import datetime
 from pydantic import EmailStr   
@@ -109,3 +110,7 @@ class UserOut(UserBase):
     
     class Config:
         form_attributes = True
+=======
+class UserCreate():
+    pass
+>>>>>>> f8bc79c6c796f5d7f0081b1b6e7935dd0640f674
