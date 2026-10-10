@@ -1,4 +1,3 @@
-# models/user.py
 from datetime import datetime
 from sqlalchemy import String, Boolean, DateTime, func, text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -22,3 +21,5 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("1"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    
+    
