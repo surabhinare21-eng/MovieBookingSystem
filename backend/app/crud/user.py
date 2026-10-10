@@ -1,11 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.user import User
-from app.schemas.user import UserCreate
-from app.models.user import User
-
-from app.db.session import get_db
+from backend.app.models.user import User
+from backend.app.schemas.user import UserCreate
+from backend.app.db.session import get_db
 
 db = get_db()
 def get_user_by_email(db, email):
