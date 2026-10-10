@@ -23,6 +23,13 @@ from backend.app.routers.public_screen import (
 )
 from backend.app.routers.public_show import router as public_show_router
 from backend.app.models.seat import Seat, SeatLock
+from backend.app.models.booking_seat import BookingSeat
+from backend.app.models.booking import Booking
+from backend.app.models.payment import Payment
+from backend.app.models.shows import Show
+from backend.app.models.movies import Movie
+from backend.app.models.screens import Screen
+from backend.app.models.city import City
 from backend.app.routers.seat import router as seat_router
 from backend.app.routers.payment import router as payment_router
 
@@ -33,17 +40,13 @@ async def lifespan(app: FastAPI):
     print("Database tables created successfully.")
 
     yield
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 6808938 (database connection and routing build succesfully)
 app = FastAPI(
     title="Movie Ticket Booking System",
     lifespan=lifespan,
 )
 
-<<<<<<< HEAD
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:8501", "http://127.0.0.1:8501"],
@@ -72,12 +75,4 @@ app.include_router(payment_router)
 def root():
     return {
         "message": "Movie Ticket Booking System Api is running"
-=======
-app.include_router(auth_router)
-
-@app.get("/")
-def root():
-    return{
-        "message":"Movie Ticket Booking System Api is running"
->>>>>>> 6808938 (database connection and routing build succesfully)
     }

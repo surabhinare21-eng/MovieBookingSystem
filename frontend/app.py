@@ -18,9 +18,9 @@ from pages.admin.theatres import theatres_page, my_theatre_page
 from pages.customer.flow import customer_flow
 
 
-# --------------------------------------------------
-# 1. Application configuration
-# --------------------------------------------------
+
+#Application configuration
+
 
 st.set_page_config(
     page_title="Movie Booking System",
@@ -40,9 +40,8 @@ st.markdown(
 )
 
 
-# --------------------------------------------------
+
 # 2. Initialize session state
-# --------------------------------------------------
 
 for key in ("token", "user", "flash", "notice"):
     if key not in st.session_state:
@@ -55,9 +54,9 @@ if "signup_success" not in st.session_state:
     st.session_state.signup_success = False
 
 
-# --------------------------------------------------
+
 # 3. Backend connection settings
-# --------------------------------------------------
+
 
 with st.sidebar.expander("Connection"):
     st.text_input(
@@ -67,9 +66,8 @@ with st.sidebar.expander("Connection"):
     )
 
 
-# --------------------------------------------------
 # 4. Sidebar user information and logout
-# --------------------------------------------------
+
 
 user = st.session_state.user
 
@@ -85,9 +83,9 @@ if user:
         st.rerun()
 
 
-# --------------------------------------------------
+
 # 5. Application title and notifications
-# --------------------------------------------------
+
 
 st.title("Movie Ticket Booking System")
 
@@ -100,9 +98,9 @@ if st.session_state.flash:
     st.session_state.flash = None
 
 
-# --------------------------------------------------
+
 # 6. Reusable tab renderer
-# --------------------------------------------------
+
 
 
 def render_tabs(screens: dict) -> None:
@@ -135,9 +133,9 @@ def render_tabs(screens: dict) -> None:
 
 
 
-# --------------------------------------------------
+
 # 7. Role-based routing
-# --------------------------------------------------
+
 
 user = st.session_state.user
 
@@ -145,6 +143,14 @@ if not user:
     auth_screen()
 
 elif user["role"] == "CUSTOMER":
+    st.sidebar.markdown("### Customer Menu")
+    if st.sidebar.button("Home", use_container_width=True):
+        st.session_state["customer_view"] = "home"
+        st.session_state["booking_step"] = "cities"
+        st.rerun()
+    if st.sidebar.button("My Bookings", use_container_width=True):
+        st.session_state["customer_view"] = "my_bookings"
+        st.rerun()
     customer_flow()
 
 
