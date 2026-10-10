@@ -7,8 +7,9 @@ from backend.app.core.security import(
 )
 
 from backend.app.models.user import User
+from backend.app.models.user import Role
 
-def register_customer(db,username,email,password) -> User:
+def register_customer(db, username, email, phone_no, password) -> User:
     """
     Register a new customer.
 
@@ -17,20 +18,18 @@ def register_customer(db,username,email,password) -> User:
     normalized_email = email.strip().lower()
 
     # Check whether this email is already registered.
-    existing_user = db.scalar(
-        select(User).where(User.email == normalized_email)
-    )
+    existing_user = db.scalar(select(User).where(User.user_email == normalized_email))
 
     if existing_user:
         raise ValueError("An account with this email already exists.")
 
     # Customers always receive the CUSTOMER role.
     user = User(
-        full_name=usernamename.strip(),
-        email=normalized_email,
-        password_hash=hash_password(password),
-        role=UserRole.CUSTOMER,
-        theatre_id=None,
+        username=username.strip(),
+        user_email=normalized_email,
+        phone_no=phone_no.strip(),
+        hashed_password=hash_password(password),
+        role=Role.CUSTOMER,
     )
 
     db.add(user)
@@ -50,13 +49,13 @@ def login_user(
     normalized_email = email.strip().lower()
 
     user = db.scalar(
-        select(User).where(User.email == normalized_email)
+        select(User).where(User.user_email == normalized_email)
     )
 
     # Use the same message for an unknown email and a wrong password.
     if user is None or not verify_password(
         password,
-        user.password_hash,
+        user.hashed_password,
     ):
         raise ValueError("Invalid email or password.")
 
@@ -64,8 +63,8 @@ def login_user(
         raise ValueError("This account has been deactivated.")
 
     access_token = create_access_token(
-        user_id=user.id,
-        role=user.role.value,
+        user_id=User.user_id,
+        role=user.role,
     )
 
     return {

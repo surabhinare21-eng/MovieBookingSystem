@@ -44,7 +44,7 @@ def get_current_user(
         raise unauthorized
 
     user = db.scalar(
-        select(User).where(User.id == user_id)
+        select(User).where(User.user_id == user_id)
     )
 
     if user is None or not user.is_active:

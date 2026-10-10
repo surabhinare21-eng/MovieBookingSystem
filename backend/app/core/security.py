@@ -1,7 +1,5 @@
 from datetime import datetime, timezone,timedelta
-from typing import Optional
 import jwt
-from backend.app.utils.config import settings
 from pwdlib import PasswordHash
 
 password_hash = PasswordHash.recommended()
@@ -26,7 +24,7 @@ def create_access_token(user_id,role)->str:
     
     payload = {
         "sub":str(user_id),
-        "sub":role,
+        "role": role,
         "exp": expires_at
     }
     
