@@ -154,6 +154,57 @@ def verify_signup_email(payload: EmailVerification, db: Session = Depends(get_db
         },
     }
 
+# @router.post("/login")
+# async def login(
+#     request: Request,
+#     db: Session = Depends(get_db),
+# ):
+#     """Authenticate a user and return a JWT."""
+
+#     try:
+#         data = await request.json()
+#     except (ValueError, UnicodeDecodeError):
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Request body must contain valid JSON.",
+#         )
+
+#     if not isinstance(data, dict):
+#         raise HTTPException(
+#             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+#             detail="Request body must be a JSON object.",
+#         )
+
+#     email = get_required_text(data, "email")
+#     password = data.get("password")
+
+#     if not isinstance(password, str) or not password:
+#         raise HTTPException(
+#             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+#             detail="'password' is required.",
+#         )
+
+#     try:
+#         return login_user(
+#             db=db,
+#             email=email,
+#             password=password,
+#         )
+#     except ValueError as exc:
+#         message = str(exc)
+
+#         if message == "This account has been deactivated.":
+#             raise HTTPException(
+#                 status_code=status.HTTP_403_FORBIDDEN,
+#                 detail=message,
+#             )
+
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Invalid email or password.",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+
 
 @router.post("/login")
 def login(payload: UserLogin, db: Session = Depends(get_db)):
@@ -192,3 +243,46 @@ def get_my_profile(current_user: User = Depends(get_current_user)):
 
 
 
+
+
+from fastapi import APIRouter,Depends,HTTPException,Request,status
+from sqlalchemy.orm import Session
+from app.db.session import get_db
+from app.core.dependencies import get_current_user
+from app.models.user import User
+from app.services.auth_service import(login_user,register_customer)
+
+router = APIRouter(prefix="/auth",tags=["Authentication"])
+
+def get_required_text(data: dict, field: str) -> str:
+    """Retrieve a required, non-empty string from a request body."""
+
+    value = data.get(field)
+
+    if not isinstance(value, str) or not value.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"'{field}' is required and must be a non-empty string.",
+        )
+
+    return value.strip()
+
+
+
+
+
+
+@router.get("/me")
+def get_my_profile(
+    current_user: User = Depends(get_current_user),
+):
+    """Return the profile of the currently authenticated user."""
+
+    return {
+        "id": current_user.id,
+        "full_name": current_user.full_name,
+        "email": current_user.email,
+        "role": current_user.role.value,
+        "theatre_id": current_user.theatre_id,
+        "is_active": current_user.is_active,
+    }
