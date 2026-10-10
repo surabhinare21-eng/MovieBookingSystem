@@ -33,13 +33,17 @@ async def lifespan(app: FastAPI):
     print("Database tables created successfully.")
 
     yield
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 6808938 (database connection and routing build succesfully)
 app = FastAPI(
     title="Movie Ticket Booking System",
     lifespan=lifespan,
 )
 
+<<<<<<< HEAD
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:8501", "http://127.0.0.1:8501"],
@@ -68,4 +72,12 @@ app.include_router(payment_router)
 def root():
     return {
         "message": "Movie Ticket Booking System Api is running"
+=======
+app.include_router(auth_router)
+
+@app.get("/")
+def root():
+    return{
+        "message":"Movie Ticket Booking System Api is running"
+>>>>>>> 6808938 (database connection and routing build succesfully)
     }
