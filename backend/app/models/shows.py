@@ -31,7 +31,7 @@ class Show(Base):
         default=True,
         nullable=False
     )
-
+    
     show_language: Mapped[ShowLanguages] = mapped_column(
         SQLEnum(ShowLanguages),
         nullable=False

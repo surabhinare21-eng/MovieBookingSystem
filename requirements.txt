@@ -5,9 +5,8 @@ dotenv==0.9.9
 sqlalchemy==2.1.4
 pymysql==1.2.3
 streamlit==1.65.0
-pwdlib==0.3.1
+pwdlib[argon2,bcrypt]==0.3.1
 pydantic-extra-types==2.11.1
 pydantic==2.14.0
-pwdlib[argon2]
 phonenumbers
 pydantic[email]
