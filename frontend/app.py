@@ -1,4 +1,4 @@
-import pandas as pd
+
 import streamlit as st
 
 from api import DEFAULT_API_URL, PASSWORD_RULE, call
@@ -48,15 +48,24 @@ def status_color(value):
         return "color: #1B7F3B; font-weight: 600"
     return "color: #B3261E; font-weight: 600"
 
-
 def show_table(rows, columns: dict):
-    """Show rows as a table. columns maps backend field -> column heading."""
-    data = pd.DataFrame([{label: row.get(f) for f, label in columns.items()} for row in rows])
-    if "Status" in data.columns:
-        styler = data.style
-        apply_colors = styler.map if hasattr(styler, "map") else styler.applymap
-        data = apply_colors(status_color, subset=["Status"])
-    st.dataframe(data, hide_index=True)
+    if not rows:
+        st.info("No records available.")
+        return
+
+    headers = list(columns.values())
+
+    st.dataframe(
+        [
+            {
+                label: row.get(field, "-")
+                for field, label in columns.items()
+            }
+            for row in rows
+        ],
+        hide_index=True,
+        use_container_width=True,
+    )
 
 
 def matches(query: str, *values) -> bool:
