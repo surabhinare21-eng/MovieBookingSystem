@@ -147,30 +147,52 @@ def auth_screen():
 
         with signup_tab:
             st.caption("New accounts are customer accounts.")
+
             with st.form("signup_form"):
                 username = st.text_input("Username", key="signup_username")
                 email = st.text_input("Email", key="signup_email")
                 phone = st.text_input("Phone number", key="signup_phone")
+
                 password = st.text_input(
-                    "Password", type="password", max_chars=12, help=PASSWORD_RULE, key="signup_password"
+                    "Password",
+                    type="password",
+                    max_chars=12,
+                    help=PASSWORD_RULE,
+                    key="signup_password",
                 )
+
+                confirm_password = st.text_input(
+                    "Confirm Password",
+                    type="password",
+                    max_chars=12,
+                    key="signup_confirm_password",
+                )
+
                 submitted = st.form_submit_button("Sign up")
 
             if submitted:
-                ok, data, _ = api(
-                    "POST",
-                    "/auth/signup",
-                    json={
-                        "username": username.strip(),
-                        "user_email": email.strip(),
-                        "phone_no": phone.strip(),
-                        "password": password,
-                    },
-                )
-                if ok:
-                    st.success("Account created. Log in with your email and password.")
+                if password != confirm_password:
+                    st.error("Passwords do not match. Please try again.")
+
                 else:
-                    st.error(data)
+                    ok, data, _ = api(
+                        "POST",
+                        "/auth/signup",
+                        json={
+                            "username": username.strip(),
+                            "user_email": email.strip(),
+                            "phone_no": phone.strip(),
+                            "password": password,
+                        },
+                    )
+
+                    if ok:
+                        st.success(
+                            "Account created. Log in with your email and password."
+                        )
+                    else:
+                        st.error(data)
+            
 
 
 def profile_page():
