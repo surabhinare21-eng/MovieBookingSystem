@@ -2,7 +2,32 @@ from sqlalchemy import select
 
 from backend.app.core.security import hash_password
 from backend.app.models.theatre import Theatre
+from backend.app.models.city import City
 from backend.app.models.user import Role, User
+
+
+def create_city(db, name) -> City:
+    exists = db.scalar(
+        select(City).where(City.name == name.strip())
+    )
+    if exists:
+        raise ValueError("A City with this name already exists.")
+
+    city = City(name=name.strip(), city=city.strip())
+    db.add(city)
+    db.commit()
+    db.refresh(city)
+    return City
+
+def set_city_active(db,name,city_id:int,is_active:bool)-> City:
+    city = db.get(City,city_id)
+    if city is None:
+        raise LookupError("City not found")
+    
+    city.is_active = is_active
+    db.commit()
+    db.refresh(city)
+    return city
 
 
 def create_theatre(db, name, city, address) -> Theatre:
@@ -17,7 +42,6 @@ def create_theatre(db, name, city, address) -> Theatre:
     db.commit()
     db.refresh(theatre)
     return theatre
-
 
 def set_theatre_active(db, theatre_id: int, is_active: bool) -> Theatre:
     theatre = db.get(Theatre, theatre_id)
