@@ -150,21 +150,36 @@ def auth_screen():
 
             if st.session_state.pending_signup_email:
                 pending_email = st.session_state.pending_signup_email
-                st.info(f"A 6-digit verification code was sent to {pending_email}. It expires in 10 minutes.")
+                st.info(
+                    f"A 6-digit verification code was sent to {pending_email}. "
+                    "It expires in 10 minutes."
+                )
+
                 with st.form("verify_signup_form"):
-                    otp = st.text_input("Email verification code", max_chars=6, key="signup_otp")
-                    verify_submitted = st.form_submit_button("Verify email and create account")
+                    otp = st.text_input(
+                        "Email verification code",
+                        max_chars=6,
+                        key="signup_otp",
+                    )
+                    verify_submitted = st.form_submit_button(
+                        "Verify email and create account"
+                    )
 
                 if verify_submitted:
                     ok, data, _ = api(
                         "POST",
                         "/auth/signup/verify",
-                        json={"user_email": pending_email, "otp": otp.strip()},
+                        json={
+                            "user_email": pending_email,
+                            "otp": otp.strip(),
+                        },
                     )
+
                     if ok:
                         st.session_state.pending_signup_email = None
                         st.session_state.signup_success = data.get(
-                            "message", "Email verified. You can now log in."
+                            "message",
+                            "Email verified. You can now log in.",
                         )
                         st.rerun()
                     else:
@@ -184,12 +199,17 @@ def auth_screen():
                     email = st.text_input("Email", key="signup_email")
                     phone = st.text_input("Phone number", key="signup_phone")
                     password = st.text_input(
-                        "Password", type="password", max_chars=12,
-                        help=PASSWORD_RULE, key="signup_password"
+                        "Password",
+                        type="password",
+                        max_chars=12,
+                        help=PASSWORD_RULE,
+                        key="signup_password",
                     )
                     confirm_password = st.text_input(
-                        "Confirm Password", type="password", max_chars=12,
-                        key="signup_confirm_password"
+                        "Confirm Password",
+                        type="password",
+                        max_chars=12,
+                        key="signup_confirm_password",
                     )
                     submitted = st.form_submit_button("Send verification code")
 
@@ -207,12 +227,18 @@ def auth_screen():
                                 "password": password,
                             },
                         )
+
                         if ok:
-                            st.session_state.pending_signup_email = email.strip().lower()
-                            st.success(data.get("message", "Verification code sent."))
+                            st.session_state.pending_signup_email = (
+                                email.strip().lower()
+                            )
+                            st.success(
+                                data.get("message", "Verification code sent.")
+                            )
                             st.rerun()
                         else:
                             st.error(data)
+
 
 
 def profile_page():
