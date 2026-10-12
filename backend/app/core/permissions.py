@@ -1,53 +1,19 @@
-import jwt
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
-from app.core.security import decode_access_token
-from app.models.user import User
-from app.core.database import get_db
+from backend.app.core.dependencies import get_current_user
+from backend.app.models.user import Role, User
 
 
-bearer_scheme = HTTPBearer(
-    auto_error=False,
-)
+def require_roles(*allowed_roles: Role):
+    """Allow the request only if the logged-in user has one of these roles."""
 
+    def checker(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.role not in [r.value for r in allowed_roles]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to perform this action.",
+            )
+        return current_user
 
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(
-        bearer_scheme
-    ),
-    db: Session = Depends(get_db),
-) -> User:
-    """Validate the JWT and retrieve the authenticated user."""
-
-    unauthorized = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid or missing authentication token.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    if credentials is None:
-        raise unauthorized
-
-    try:
-        payload = decode_access_token(credentials.credentials)
-        subject = payload.get("sub")
-
-        if not isinstance(subject, str) or not subject.isdigit():
-            raise unauthorized
-
-        user_id = int(subject)
-
-    except (jwt.InvalidTokenError, ValueError):
-        raise unauthorized
-
-    user = db.scalar(
-        select(User).where(User.id == user_id)
-    )
-
-    if user is None or not user.is_active:
-        raise unauthorized
-
-    return user
+    return checker

@@ -4,9 +4,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.security import decode_access_token
-from app.models.user import User
-from app.db.database import get_db
+from backend.app.core.security import decode_access_token
+from backend.app.models.user import User
+from backend.app.db.session import get_db
 
 
 bearer_scheme = HTTPBearer(
@@ -44,7 +44,7 @@ def get_current_user(
         raise unauthorized
 
     user = db.scalar(
-        select(User).where(User.id == user_id)
+        select(User).where(User.user_id == user_id)
     )
 
     if user is None or not user.is_active:

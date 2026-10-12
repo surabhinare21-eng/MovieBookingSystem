@@ -1,13 +1,17 @@
-from datetime import datetime
-from sqlalchemy import String, Boolean, DateTime, func, text
-from sqlalchemy.orm import Mapped, mapped_column
 from enum import Enum
-from app.db.base import Base
+from datetime import datetime
 
-class Role(str, Enum.enum):
-    ADMIN = "ADMIN"
-    SUPER_ADMIN = "SUPER_ADMIN"
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, func, text
+from sqlalchemy.orm import Mapped, mapped_column
+
+from backend.app.db.base import Base
+
+
+class Role(str, Enum):
+    ADMIN = "ADMIN"              # theatre admin (belongs to one theatre)
+    SUPER_ADMIN = "SUPER_ADMIN"  # root admin (platform owner)
     CUSTOMER = "CUSTOMER"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -15,11 +19,16 @@ class User(Base):
     user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(100), nullable=False)
     user_email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    phone_no = Mapped[str] = mapped_column(String, nullable=False)
+    phone_no: Mapped[str] = mapped_column(String(20), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    role : Mapped[Role] = mapped_column(String, default=Role.CUSTOMER, nullable=False)
+    role: Mapped[Role] = mapped_column(
+        String(20),
+        default=Role.CUSTOMER,
+        nullable=False,
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("1"), nullable=False)
+    theatre_id: Mapped[int | None] = mapped_column(
+        ForeignKey("theatres.theatre_id"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
-    
-    
