@@ -2,22 +2,60 @@ from sqlalchemy import select
 
 from backend.app.core.security import hash_password
 from backend.app.models.theatre import Theatre
+from backend.app.models.city import City
 from backend.app.models.user import Role, User
 
 
-def create_theatre(db, name, city, address) -> Theatre:
+def create_city(db, name) -> City:
     exists = db.scalar(
-        select(Theatre).where(Theatre.name == name.strip(), Theatre.city == city.strip())
+        select(City).where(City.name == name.strip())
+    )
+    if exists:
+        raise ValueError("A City with this name already exists.")
+
+    city = City(name=name.strip())
+    db.add(city)
+    db.commit()
+    db.refresh(city)
+    return city
+
+def set_city_active(db,name,city_id:int,is_active:bool)-> City:
+    city = db.get(City,city_id)
+    if city is None:
+        raise LookupError("City not found")
+    
+    city.is_active = is_active
+    db.commit()
+    db.refresh(city)
+    return city
+
+
+def create_theatre(db, name, city, address) -> Theatre:
+    city_record = db.scalar(
+        select(City).where(City.name == city.strip(), City.is_active.is_(True))
+    )
+    if city_record is None:
+        raise LookupError("City not found or inactive.")
+
+    exists = db.scalar(
+        select(Theatre).where(
+            Theatre.name == name.strip(),
+            Theatre.city_id == city_record.city_id,
+        )
     )
     if exists:
         raise ValueError("A theatre with this name already exists in this city.")
 
-    theatre = Theatre(name=name.strip(), city=city.strip(), address=address.strip())
+    theatre = Theatre(
+        name=name.strip(),
+        city_id=city_record.city_id,
+        address=address.strip(),
+        contact_info="",
+    )
     db.add(theatre)
     db.commit()
     db.refresh(theatre)
     return theatre
-
 
 def set_theatre_active(db, theatre_id: int, is_active: bool) -> Theatre:
     theatre = db.get(Theatre, theatre_id)

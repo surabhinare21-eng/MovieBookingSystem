@@ -4,7 +4,7 @@ import streamlit as st
 from api import DEFAULT_API_URL, PASSWORD_RULE, call
 
 st.set_page_config(page_title="Movie Booking System", layout="wide")
-
+from datetime import datetime
 ROLE_LABELS = {
     "SUPER_ADMIN": "Super admin",
     "ADMIN": "Theatre admin",
@@ -12,7 +12,7 @@ ROLE_LABELS = {
 }
 
 
-for key in ("token", "user", "flash", "notice", "pending_signup_email", "signup_success") :
+for key in ("token", "user", "flash", "notice"):
     if key not in st.session_state:
         st.session_state[key] = None
 
@@ -49,8 +49,6 @@ def status_color(value):
     return "color: #B3261E; font-weight: 600"
 
 def show_table(rows, columns: dict):
-    """make table"""
-
     if not rows:
         st.info("No records available.")
         return
@@ -66,7 +64,7 @@ def show_table(rows, columns: dict):
             for row in rows
         ],
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
 
@@ -311,6 +309,489 @@ def my_theatre_page():
                     st.rerun()
                 else:
                     st.error(data)
+
+def cities_page():
+    st.subheader("City Management")
+    st.caption("Add and manage cities available for theatres.")
+    with st.expander("Add a new city", expanded=True):
+        with st.form("add_city_form", clear_on_submit=True):
+            city_name = st.text_input(
+                "City name",
+                placeholder="Enter the name of the city",
+            )
+            submitted = st.form_submit_button("Add city")
+        if submitted:
+            if not city_name.strip():
+                st.error("City name cannot be empty.")
+            else:
+                ok, data, _ = api(
+                    "POST",
+                    "/root-admin/cities",
+                    json={"name": city_name.strip()},
+                )
+                if ok:
+                    flash(f"City '{data['name']}' added successfully.")
+                    st.rerun()
+                else:
+                    st.error(data)
+
+    st.divider()
+    st.subheader("Registered cities")
+    ok, cities, _ = api("GET", "/root-admin/cities")
+    if not ok:
+        st.error(cities)
+        return
+    if not cities:
+        st.info("No cities have been added yet.")
+        return
+
+    show_table(
+        [
+            {
+                "City ID": city["city_id"],
+                "Name": city["name"],
+                "Status": active_text(city["is_active"]),
+            }
+            for city in cities
+        ],
+        {
+            "City ID": "City ID",
+            "Name": "Name",
+            "Status": "Status",
+        },
+    )
+
+    labels = {city["city_id"]: city["name"] for city in cities}
+    selected_id = st.selectbox(
+        "Manage city",
+        list(labels),
+        format_func=lambda city_id: f"{labels[city_id]} (ID {city_id})",
+        key="manage_city_id",
+    )
+    selected = next(city for city in cities if city["city_id"] == selected_id)
+    button_label = "Deactivate city" if selected["is_active"] else "Activate city"
+
+    if st.button(button_label, key="toggle_city_status"):
+        ok, data, _ = api(
+            "PATCH",
+            f"/root-admin/cities/{selected_id}/status",
+            json={"is_active": not selected["is_active"]},
+        )
+        if ok:
+            flash(f"City '{selected['name']}' status updated.")
+            st.rerun()
+        else:
+            st.error(data)
+
+    
+def shows_page():
+    st.subheader("Show Scheduling")
+    st.caption("Schedule and manage movie shows for your theatre.")
+
+    with st.expander("Schedule a new show", expanded=True):
+        with st.form("create_show_form", clear_on_submit=True):
+            col1, col2 = st.columns(2)
+
+            movie_id = col1.number_input(
+                "Movie ID",
+                min_value=1,
+                
+            )
+
+            screen_id = col2.number_input(
+                "Screen ID",
+                min_value=1,
+                
+            )
+
+            col3, col4 = st.columns(2)
+
+            show_language = col3.selectbox(
+                "Language",
+                ["English", "Hindi", "Marathi", "Other"],
+            )
+
+            show_format = col4.selectbox(
+                "Format",
+                ["2D", "3D", "IMAX", "4DX"],
+            )
+
+            col5, col6 = st.columns(2)
+
+            start_date = col5.date_input(
+                "Show date",
+                key="show_start_date",
+            )
+
+            start_time = col6.time_input(
+                "Start time",
+                key="show_start_time",
+            )
+
+            col7, col8 = st.columns(2)
+
+            end_date = col7.date_input(
+                "End date",
+                value=start_date,
+                key="show_end_date",
+            )
+
+            end_time = col8.time_input(
+                "End time",
+                value=start_time,
+                key="show_end_time",
+            )
+
+            submitted = st.form_submit_button(
+                "Schedule show",
+                type="primary",
+            )
+
+        if submitted:
+            start_datetime = datetime.combine(
+                start_date, start_time
+            )
+            end_datetime = datetime.combine(
+                end_date, end_time
+            )
+
+            if end_datetime <= start_datetime:
+                st.error("End time must be after start time.")
+            else:
+                payload = {
+                    "show_start_time": start_datetime.isoformat(),
+                    "show_end_time": end_datetime.isoformat(),
+                    "show_status": True,
+                    "show_language": show_language,
+                    "show_format": show_format,
+                    "screen_id": int(screen_id),
+                    "movie_id": int(movie_id),
+                }
+
+                ok, data, _ = api(
+                    "POST",
+                    "/shows/",
+                    json=payload,
+                )
+
+                if ok:
+                    flash("Show scheduled successfully.")
+                    st.rerun()
+                else:
+                    st.error(data)
+
+    st.divider()
+    st.subheader("Scheduled shows")
+
+    if st.button("Refresh shows", key="refresh_shows"):
+        st.rerun()
+
+    ok, shows, _ = api("GET", "/shows/")
+
+    if not ok:
+        st.error(shows)
+        return
+
+    if not shows:
+        st.info("No shows have been scheduled yet.")
+        return
+
+    rows = []
+
+    for show in shows:
+        rows.append({
+            "Show ID": show["show_id"],
+            "Movie ID": show["movie_id"],
+            "Screen ID": show["screen_id"],
+            "Start Time": show["show_start_time"],
+            "End Time": show["show_end_time"],
+            "Language": show["show_language"],
+            "Format": show["show_format"],
+            "Status": active_text(show["show_status"]),
+        })
+
+    show_table(rows, {
+        "Show ID": "Show ID",
+        "Movie ID": "Movie ID",
+        "Screen ID": "Screen ID",
+        "Start Time": "Start Time",
+        "End Time": "End Time",
+        "Language": "Language",
+        "Format": "Format",
+        "Status": "Status",
+    })
+
+    st.subheader("Manage show status")
+
+    show_ids = [show["show_id"] for show in shows]
+
+    selected_id = st.selectbox(
+        "Select show",
+        show_ids,
+        key="manage_show_id",
+    )
+
+    selected_show = next(
+        show for show in shows
+        if show["show_id"] == selected_id
+    )
+
+    currently_active = selected_show["show_status"]
+
+    st.write(
+        f"Current status: "
+        f"{active_text(currently_active)}"
+    )
+
+    button_label = (
+        "Deactivate show"
+        if currently_active
+        else "Activate show"
+    )
+
+    if st.button(button_label, key="toggle_show_status"):
+        ok, data, _ = api(
+            "PATCH",
+            f"/shows/{selected_id}/status",
+            json={"show_status": not currently_active},
+        )
+
+        if ok:
+            flash("Show status updated successfully.")
+            st.rerun()
+        else:
+            st.error(data)
+            
+            
+def screens_page():
+    st.subheader("Screen Management")
+    st.caption("Manage the screens assigned to the theatres.")
+
+    with st.expander("Add a screen", expanded=True):
+        with st.form("create_screen_form", clear_on_submit=True):
+            screen_is_active = st.checkbox("Active", value=True)
+            total_rows = st.number_input("Total rows", min_value=0, step=1)
+            total_cols = st.number_input("Total columns", min_value=0, step=1)
+            submitted = st.form_submit_button("Add screen", type="primary")
+
+        if submitted:
+            ok, data, _ = api(
+                "POST",
+                "/screens/",
+                json={
+                    "screen_is_active": screen_is_active,
+                    "total_rows": int(total_rows),
+                    "total_cols": int(total_cols),
+                },
+            )
+            if ok:
+                flash(f"Screen {data['screen_id']} added successfully.")
+                st.rerun()
+            else:
+                st.error(data)
+
+    st.divider()
+    st.subheader("Your screens")
+    ok, screens, _ = api("GET", "/screens/")
+    if not ok:
+        st.error(screens)
+        return
+    if not screens:
+        st.info("No screens have been added yet.")
+        return
+
+    show_table(
+        [
+            {
+                "Screen ID": screen["screen_id"],
+                "Status": active_text(screen["screen_is_active"]),
+                "Rows": screen["total_rows"],
+                "Columns": screen["total_cols"],
+            }
+            for screen in screens
+        ],
+        {
+            "Screen ID": "Screen ID",
+            "Status": "Status",
+            "Rows": "Rows",
+            "Columns": "Columns",
+        },
+    )
+
+    labels = {screen["screen_id"]: f"Screen {screen['screen_id']}" for screen in screens}
+    selected_id = st.selectbox(
+        "Manage screen",
+        list(labels),
+        format_func=lambda screen_id: labels[screen_id],
+        key="manage_screen_id",
+    )
+    selected = next(screen for screen in screens if screen["screen_id"] == selected_id)
+
+    with st.form("update_screen_form"):
+        is_active = st.checkbox("Active", value=selected["screen_is_active"])
+        rows = st.number_input(
+            "Total rows",
+            min_value=0,
+            value=selected["total_rows"],
+            step=1,
+        )
+        columns = st.number_input(
+            "Total columns",
+            min_value=0,
+            value=selected["total_cols"],
+            step=1,
+        )
+        update_submitted = st.form_submit_button("Save screen")
+
+    if update_submitted:
+        ok, data, _ = api(
+            "PATCH",
+            f"/screens/{selected_id}",
+            json={
+                "screen_is_active": is_active,
+                "total_rows": int(rows),
+                "total_cols": int(columns),
+            },
+        )
+        if ok:
+            flash("Screen updated successfully.")
+            st.rerun()
+        else:
+            st.error(data)
+
+    if st.button("Delete screen", key="delete_screen"):
+        ok, data, _ = api("DELETE", f"/screens/{selected_id}")
+        if ok:
+            flash("Screen deleted successfully.")
+            st.rerun()
+        else:
+            st.error(data)
+
+
+def movies_page():
+    st.subheader("Movie Catalogue")
+    st.caption("Create and manage movies available for show scheduling.")
+
+    with st.expander("Add a movie", expanded=True):
+        with st.form("create_movie_form", clear_on_submit=True):
+            title = st.text_input("Title")
+            description = st.text_area("Description")
+            language = st.selectbox("Language", ["ENGLISH", "HINDI", "MARATHI"])
+            movie_status = st.selectbox("Status", ["ACTIVE", "INACTIVE"])
+            poster_url = st.text_input("Poster URL")
+            rating = st.number_input("Rating", min_value=0, max_value=10, step=1)
+            submitted = st.form_submit_button("Add movie", type="primary")
+
+        if submitted:
+            if not title.strip() or not description.strip() or not poster_url.strip():
+                st.error("Title, description, and poster URL are required.")
+            else:
+                ok, data, _ = api(
+                    "POST",
+                    "/movies/",
+                    json={
+                        "movie_title": title.strip(),
+                        "movie_description": description.strip(),
+                        "movie_status": movie_status,
+                        "movie_language": language,
+                        "movie_poster_url": poster_url.strip(),
+                        "movie_rating": int(rating),
+                    },
+                )
+                if ok:
+                    flash(f"Movie '{data['movie_title']}' added successfully.")
+                    st.rerun()
+                else:
+                    st.error(data)
+
+    st.divider()
+    st.subheader("Movies")
+    ok, movies, _ = api("GET", "/movies/")
+    if not ok:
+        st.error(movies)
+        return
+    if not movies:
+        st.info("No movies have been added yet.")
+        return
+
+    show_table(
+        [
+            {
+                "Movie ID": movie["movie_id"],
+                "Title": movie["movie_title"],
+                "Language": movie["movie_language"],
+                "Status": movie["movie_status"],
+                "Rating": movie["movie_rating"],
+            }
+            for movie in movies
+        ],
+        {
+            "Movie ID": "Movie ID",
+            "Title": "Title",
+            "Language": "Language",
+            "Status": "Status",
+            "Rating": "Rating",
+        },
+    )
+
+    labels = {movie["movie_id"]: movie["movie_title"] for movie in movies}
+    selected_id = st.selectbox(
+        "Manage movie",
+        list(labels),
+        format_func=lambda movie_id: f"{labels[movie_id]} (ID {movie_id})",
+        key="manage_movie_id",
+    )
+    selected = next(movie for movie in movies if movie["movie_id"] == selected_id)
+
+    with st.form("update_movie_form"):
+        title = st.text_input("Title", value=selected["movie_title"])
+        description = st.text_area("Description", value=selected["movie_description"])
+        language = st.selectbox(
+            "Language",
+            ["ENGLISH", "HINDI", "MARATHI"],
+            index=["ENGLISH", "HINDI", "MARATHI"].index(selected["movie_language"]),
+        )
+        movie_status = st.selectbox(
+            "Status",
+            ["ACTIVE", "INACTIVE"],
+            index=["ACTIVE", "INACTIVE"].index(selected["movie_status"]),
+        )
+        poster_url = st.text_input("Poster URL", value=selected["movie_poster_url"])
+        rating = st.number_input(
+            "Rating",
+            min_value=0,
+            max_value=10,
+            value=selected["movie_rating"],
+            step=1,
+        )
+        update_submitted = st.form_submit_button("Save movie")
+
+    if update_submitted:
+        ok, data, _ = api(
+            "PATCH",
+            f"/movies/{selected_id}",
+            json={
+                "movie_title": title.strip(),
+                "movie_description": description.strip(),
+                "movie_status": movie_status,
+                "movie_language": language,
+                "movie_poster_url": poster_url.strip(),
+                "movie_rating": int(rating),
+            },
+        )
+        if ok:
+            flash("Movie updated successfully.")
+            st.rerun()
+        else:
+            st.error(data)
+
+    if st.button("Delete movie", key="delete_movie"):
+        ok, data, _ = api("DELETE", f"/movies/{selected_id}")
+        if ok:
+            flash("Movie deleted successfully.")
+            st.rerun()
+        else:
+            st.error(data)
 
 
 def overview_page():
@@ -565,16 +1046,24 @@ if not user:
     auth_screen()
 elif user["role"] == "CUSTOMER":
     customer_home()
+
 elif user["role"] == "ADMIN":
     st.header("Theatre admin")
-    render_tabs({"My theatre": my_theatre_page, "My profile": profile_page})
+    render_tabs({
+        "My theatre": my_theatre_page,
+        "Screens": screens_page,
+        "Show Scheduling": shows_page,
+        "My profile": profile_page,
+    })
 elif user["role"] == "SUPER_ADMIN":
     st.header("Super admin")
     render_tabs(
         {
             "Overview": overview_page,
+            "Cities": cities_page,
             "Theatres": theatres_page,
             "Theatre admins": theatre_admins_page,
+            "Movies": movies_page,
             "Users": users_page,
             "My profile": profile_page,
         }

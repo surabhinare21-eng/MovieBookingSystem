@@ -1,6 +1,5 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
-from datetime import datetime
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from backend.app.models.user import Role
 

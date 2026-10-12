@@ -1,3 +1,5 @@
+
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -46,4 +48,5 @@ def update_user(db, user, data):
 def delete_user(db, user) -> None:
     db.delete(user)
     db.commit()
+
     

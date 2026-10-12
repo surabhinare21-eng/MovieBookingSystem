@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from backend.app.core.security import (
     create_access_token,
     hash_password,
-    verify_password,
+    verify_password_and_update,
 )
 from backend.app.models.user import Role, User
 
@@ -50,8 +50,19 @@ def login_user(
         select(User).where(User.user_email == normalized_email)
     )
 
-    if user is None or not verify_password(password, user.hashed_password):
+    if user is None:
         raise ValueError("Invalid email or password.")
+
+    password_matches, updated_hash = verify_password_and_update(
+        password,
+        user.hashed_password,
+    )
+    if not password_matches:
+        raise ValueError("Invalid email or password.")
+
+    if updated_hash is not None:
+        user.hashed_password = updated_hash
+        db.commit()
 
     if not user.is_active:
         raise ValueError("This account has been deactivated.")

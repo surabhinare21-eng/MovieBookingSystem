@@ -10,6 +10,13 @@ from backend.app.models.theatre import Theatre  # noqa: F401
 from backend.app.routers.auth import router as auth_router
 from backend.app.routers.root_admin import router as root_admin_router
 from backend.app.routers.theatre_admin import router as theatre_admin_router
+from backend.app.routers.show import router as show_router
+from backend.app.routers.screen import router as screen_router
+from backend.app.routers.movie import router as movie_router
+from backend.app.routers.city import router as city_router
+from backend.app.models.shows import Show  
+from backend.app.models.screens import Screen  # noqa: F401
+from backend.app.models.movies import Movie    # noqa: F401
 
 
 @asynccontextmanager
@@ -37,6 +44,10 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(root_admin_router)
 app.include_router(theatre_admin_router)
+app.include_router(show_router)
+app.include_router(screen_router)
+app.include_router(movie_router)
+app.include_router(city_router)
 
 
 @app.get("/")

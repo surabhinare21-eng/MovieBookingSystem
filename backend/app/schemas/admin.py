@@ -1,14 +1,25 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from backend.app.schemas.user import PASSWORD_REGEX, UserOut
 
-
+class CityCreate(BaseModel):
+    name: str = Field(min_length = 2, max_length=200)    
+    
+class CityUpdate(BaseModel):
+    name: str | None= Field(default=None,min_length=2,max_length=150)
+    
+class CityOut(BaseModel):
+    name: str
+    city_id : int
+    is_active: bool
+    model_config = {"from_attributes":True}
+    
 class TheatreCreate(BaseModel):
     name: str = Field(min_length=2, max_length=150)
     city: str = Field(min_length=2, max_length=100)
     address: str = Field(min_length=5, max_length=255)
-
-
+    
+    
 class TheatreUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=2, max_length=150)
     address: str | None = Field(default=None, min_length=5, max_length=255)
@@ -22,6 +33,11 @@ class TheatreOut(BaseModel):
     is_active: bool
 
     model_config = {"from_attributes": True}
+
+    @field_validator("city", mode="before")
+    @classmethod
+    def city_name_from_relationship(cls, value):
+        return value.name if hasattr(value, "name") else value
 
 
 class ActiveStatus(BaseModel):
