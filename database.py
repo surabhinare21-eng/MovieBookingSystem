@@ -4,8 +4,13 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
 from backend.app.db.base import Base
-from backend.app.models.user import User        
-from backend.app.models.theatre import Theatre 
+# Import every model before using Base.metadata so string-based relationships
+# can be resolved regardless of which entry point initializes the database.
+from backend.app.models.user import User  # noqa: F401
+from backend.app.models.theatre import Theatre  # noqa: F401
+from backend.app.models.screens import Screen  # noqa: F401
+from backend.app.models.shows import Show  # noqa: F401
+from backend.app.models.movies import Movie  # noqa: F401
 
 load_dotenv()
 

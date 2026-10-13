@@ -53,6 +53,8 @@ def add_theatre(payload: TheatreCreate, db: Session = Depends(get_db)):
         return admin_service.create_theatre(db, payload.name, payload.city, payload.address)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 @router.get("/theatres", response_model=list[TheatreOut])

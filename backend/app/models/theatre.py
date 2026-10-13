@@ -4,14 +4,15 @@ from sqlalchemy import Boolean, DateTime, String, func, text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.db.base import Base
-# from backend.app.models.cities import City
+from backend.app.models.city import City
 
 class Theatre(Base):
     __tablename__ = "theatres"
 
     theatre_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
-    # city_id: Mapped[int] = mapped_column(int, ForeignKey(cities.city_id), nullable=False)
+    city_id: Mapped[int] = mapped_column(ForeignKey("cities.city_id"),nullable=False
+)
     address: Mapped[str] = mapped_column(String(255), nullable=False)
     contact_info :Mapped[str] = mapped_column(String(50), nullable=False)
     is_active: Mapped[bool] = mapped_column(
@@ -28,3 +29,6 @@ class Theatre(Base):
         "Screen",
         back_populates="theatre"
     )
+    city: Mapped["City"] = relationship(
+    back_populates="theatres"
+)
