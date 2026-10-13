@@ -21,7 +21,6 @@ class UserCreate(BaseModel):
         pattern = PASSWORD_REGEX)
     
 
-
 class UserLogin(BaseModel):
     user_email: EmailStr
     password: str = Field(min_length=8, max_length=128)

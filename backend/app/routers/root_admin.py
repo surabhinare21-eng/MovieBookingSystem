@@ -56,7 +56,26 @@ def add_theatre(payload: TheatreCreate, db: Session = Depends(get_db)):
     except LookupError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
+@router.delete("/theatres/{theatre_id}")
+def remove_theatre(
+    theatre_id: int,
+    db: Session = Depends(get_db),
+):
+    try:
+        return admin_service.delete_theatre(db, theatre_id)
 
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete theatre.",
+        ) from exc
 @router.get("/theatres", response_model=list[TheatreOut])
 def list_theatres(db: Session = Depends(get_db)):
     return list(db.scalars(select(Theatre).order_by(Theatre.theatre_id)))
