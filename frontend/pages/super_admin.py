@@ -249,13 +249,14 @@ def theatres_page():
     header = st.columns([1.2, 1.0, 0.6, 1.4, 1.2, 2.0, 1.0])
 
     headers = [
-        "Action",
-        "Delete",
+        
         "ID",
         "Theatre",
         "City",
         "Address",
         "Status",
+        "Action",
+        "Delete"
     ]
 
     for col, label in zip(header, headers):
@@ -267,7 +268,7 @@ def theatres_page():
 
         cols = st.columns([1.2, 1.0, 0.6, 1.4, 1.2, 2.0, 1.0])
 
-        with cols[0]:
+        with cols[-2]:
             action_label = (
                 "Deactivate"
                 if theatre["is_active"]
@@ -295,18 +296,18 @@ def theatres_page():
                 else:
                     st.error(data)
 
-        with cols[1]:
+        with cols[-1]:
             if st.button(
                 "Delete",
                 key=f"delete_theatre_{theatre_id}",
             ):
                 st.session_state["pending_delete_theatre"] = theatre_id
 
-        cols[2].write(theatre_id)
-        cols[3].write(theatre["name"])
-        cols[4].write(theatre["city"])
-        cols[5].write(theatre["address"])
-        cols[6].write(active_text(theatre["is_active"]))
+        cols[0].write(theatre_id)
+        cols[1].write(theatre["name"])
+        cols[2].write(theatre["city"])
+        cols[3].write(theatre["address"])
+        cols[4].write(active_text(theatre["is_active"]))
 
     # Ask for confirmation before deleting
     pending_id = st.session_state.get("pending_delete_theatre")
@@ -363,86 +364,136 @@ def theatres_page():
                     st.rerun()
 
 
+# def theatre_admins_page():
+#     ok, theatres, _ = api("GET", "/root-admin/theatres")
+
+#     if not ok:
+#         st.error(theatres)
+#         return
+
+#     with st.container(border=True):
+#         st.subheader("Create a theatre admin")
+
+#         if not theatres:
+#             st.info(
+#                 "Add a theatre first. Every theatre admin "
+#                 "belongs to one theatre."
+#             )
+#         else:
+#             labels = {
+#                 theatre["theatre_id"]: (
+#                     f"{theatre['name']} ({theatre['city']})"
+#                 )
+#                 for theatre in theatres
+#             }
+
+#             with st.form("add_admin_form", clear_on_submit=True):
+#                 col1, col2 = st.columns(2)
+
+#                 username = col1.text_input(
+#                     "Username",
+#                     key="admin_username",
+#                 )
+#                 email = col2.text_input(
+#                     "Email",
+#                     key="admin_email",
+#                 )
+#                 phone = col1.text_input(
+#                     "Phone number",
+#                     key="admin_phone",
+#                 )
+#                 password = col2.text_input(
+#                     "Password",
+#                     type="password",
+#                     max_chars=12,
+#                     help=PASSWORD_RULE,
+#                     key="admin_password",
+#                 )
+
+#                 theatre_id = st.selectbox(
+#                     "Theatre",
+#                     list(labels),
+#                     format_func=lambda theatre_id: labels[theatre_id],
+#                     key="admin_theatre",
+#                 )
+
+#                 submitted = st.form_submit_button(
+#                     "Create theatre admin"
+#                 )
+
+#             if submitted:
+#                 ok, data, _ = api(
+#                     "POST",
+#                     "/root-admin/theatre-admins",
+#                     json={
+#                         "username": username.strip(),
+#                         "user_email": email.strip(),
+#                         "phone_no": phone.strip(),
+#                         "password": password,
+#                         "theatre_id": theatre_id,
+#                     },
+#                 )
+
+#                 if ok:
+#                     flash(
+#                         f"Theatre admin {data['username']} "
+#                         f"created for {labels[theatre_id]}."
+#                     )
+#                     st.rerun()
+#                 else:
+#                     st.error(data)
+
+#     st.subheader("Theatre admins")
+
+#     ok, admins, _ = api(
+#         "GET",
+#         "/root-admin/users",
+#         params={"role": "ADMIN", "limit": 200},
+#     )
+
+#     if not ok:
+#         st.error(admins)
+#         return
+
+#     if not admins:
+#         st.info("No theatre admins yet.")
+#         return
+
+#     theatre_names = {
+#         theatre["theatre_id"]: theatre["name"]
+#         for theatre in theatres
+#     }
+
+#     rows = [
+#         {
+#             **admin,
+#             "theatre": theatre_names.get(
+#                 admin["theatre_id"], "-"
+#             ),
+#             "status": user_status_text(admin["is_active"]),
+#         }
+#         for admin in admins
+#     ]
+
+#     show_table(
+#         rows,
+#         {
+#             "user_id": "ID",
+#             "username": "Username",
+#             "user_email": "Email",
+#             "phone_no": "Phone",
+#             "theatre": "Theatre",
+#             "status": "Status",
+#         },
+#     )
+
+
 def theatre_admins_page():
     ok, theatres, _ = api("GET", "/root-admin/theatres")
 
     if not ok:
         st.error(theatres)
         return
-
-    with st.container(border=True):
-        st.subheader("Create a theatre admin")
-
-        if not theatres:
-            st.info(
-                "Add a theatre first. Every theatre admin "
-                "belongs to one theatre."
-            )
-        else:
-            labels = {
-                theatre["theatre_id"]: (
-                    f"{theatre['name']} ({theatre['city']})"
-                )
-                for theatre in theatres
-            }
-
-            with st.form("add_admin_form", clear_on_submit=True):
-                col1, col2 = st.columns(2)
-
-                username = col1.text_input(
-                    "Username",
-                    key="admin_username",
-                )
-                email = col2.text_input(
-                    "Email",
-                    key="admin_email",
-                )
-                phone = col1.text_input(
-                    "Phone number",
-                    key="admin_phone",
-                )
-                password = col2.text_input(
-                    "Password",
-                    type="password",
-                    max_chars=12,
-                    help=PASSWORD_RULE,
-                    key="admin_password",
-                )
-
-                theatre_id = st.selectbox(
-                    "Theatre",
-                    list(labels),
-                    format_func=lambda theatre_id: labels[theatre_id],
-                    key="admin_theatre",
-                )
-
-                submitted = st.form_submit_button(
-                    "Create theatre admin"
-                )
-
-            if submitted:
-                ok, data, _ = api(
-                    "POST",
-                    "/root-admin/theatre-admins",
-                    json={
-                        "username": username.strip(),
-                        "user_email": email.strip(),
-                        "phone_no": phone.strip(),
-                        "password": password,
-                        "theatre_id": theatre_id,
-                    },
-                )
-
-                if ok:
-                    flash(
-                        f"Theatre admin {data['username']} "
-                        f"created for {labels[theatre_id]}."
-                    )
-                    st.rerun()
-                else:
-                    st.error(data)
-
-    st.subheader("Theatre admins")
 
     ok, admins, _ = api(
         "GET",
@@ -454,6 +505,68 @@ def theatre_admins_page():
         st.error(admins)
         return
 
+    labels = {
+        theatre["theatre_id"]: (
+            f"{theatre['name']} ({theatre['city']})"
+        )
+        for theatre in theatres
+    }
+
+    # Create theatre admin
+    with st.expander("Create a theatre admin"):
+        if not theatres:
+            st.info("Add a theatre first.")
+        else:
+            with st.form("add_admin_form", clear_on_submit=True):
+                username = st.text_input("Username")
+                email = st.text_input("Email")
+                phone = st.text_input("Phone number")
+                password = st.text_input(
+                    "Password",
+                    type="password",
+                    max_chars=12,
+                    help=PASSWORD_RULE,
+                )
+                theatre_id = st.selectbox(
+                    "Theatre",
+                    list(labels),
+                    format_func=lambda tid: labels[tid],
+                )
+
+                submitted = st.form_submit_button(
+                    "Create theatre admin"
+                )
+
+            if submitted:
+                if not all(
+                    [username.strip(), email.strip(),
+                     phone.strip(), password]
+                ):
+                    st.error("Please fill in all fields.")
+                else:
+                    ok, data, _ = api(
+                        "POST",
+                        "/root-admin/theatre-admins",
+                        json={
+                            "username": username.strip(),
+                            "user_email": email.strip(),
+                            "phone_no": phone.strip(),
+                            "password": password,
+                            "theatre_id": theatre_id,
+                        },
+                    )
+
+                    if ok:
+                        flash(
+                            f"Theatre admin {data['username']} created."
+                        )
+                        st.rerun()
+                    else:
+                        st.error(data)
+
+    st.divider()
+    st.subheader("Theatre admins")
+
     if not admins:
         st.info("No theatre admins yet.")
         return
@@ -463,29 +576,153 @@ def theatre_admins_page():
         for theatre in theatres
     }
 
-    rows = [
-        {
-            **admin,
-            "theatre": theatre_names.get(
-                admin["theatre_id"], "-"
-            ),
-            "status": user_status_text(admin["is_active"]),
-        }
-        for admin in admins
-    ]
+    # Admin list
+    for admin in admins:
+        admin_id = admin["user_id"]
 
-    show_table(
-        rows,
-        {
-            "user_id": "ID",
-            "username": "Username",
-            "user_email": "Email",
-            "phone_no": "Phone",
-            "theatre": "Theatre",
-            "status": "Status",
-        },
+        with st.container(border=True):
+            col1, col2 = st.columns([4, 1])
+
+            with col1:
+                st.markdown(f"**{admin['username']}**")
+                st.caption(
+                    f"Email: {admin['user_email']} | "
+                    f"Phone: {admin['phone_no']}"
+                )
+                st.write(
+                    "Theatre: "
+                    + theatre_names.get(admin["theatre_id"], "Unknown")
+                )
+                st.write(
+                    "Status: "
+                    + user_status_text(admin["is_active"])
+                )
+
+            with col2:
+                if st.button(
+                    "Edit",
+                    key=f"edit_admin_{admin_id}",
+                ):
+                    st.session_state["edit_admin_id"] = admin_id
+
+                if st.button(
+                    "Delete",
+                    key=f"delete_admin_{admin_id}",
+                ):
+                    st.session_state["delete_admin_id"] = admin_id
+
+    # Edit selected admin
+    edit_id = st.session_state.get("edit_admin_id")
+    selected = next(
+        (a for a in admins if a["user_id"] == edit_id),
+        None,
     )
 
+    if selected:
+        st.divider()
+        st.subheader(f"Edit admin: {selected['username']}")
+
+        with st.form(f"edit_admin_form_{edit_id}"):
+            username = st.text_input(
+                "Username",
+                value=selected["username"],
+            )
+            email = st.text_input(
+                "Email",
+                value=selected["user_email"],
+            )
+            phone = st.text_input(
+                "Phone number",
+                value=selected["phone_no"],
+            )
+
+            theatre_ids = list(labels)
+            current_theatre = selected["theatre_id"]
+            default_index = (
+                theatre_ids.index(current_theatre)
+                if current_theatre in theatre_ids
+                else 0
+            )
+
+            theatre_id = st.selectbox(
+                "Theatre",
+                theatre_ids,
+                index=default_index,
+                format_func=lambda tid: labels[tid],
+            ) if theatre_ids else None
+
+            save = st.form_submit_button("Save changes")
+            cancel = st.form_submit_button("Cancel")
+
+        if cancel:
+            st.session_state.pop("edit_admin_id", None)
+            st.rerun()
+
+        if save:
+            if not all([username.strip(), email.strip(), phone.strip()]):
+                st.error("Please fill in all fields.")
+            elif theatre_id is None:
+                st.error("Please add a theatre first.")
+            else:
+                # Confirm the correct endpoint and payload
+                # against your backend before using this request.
+                ok, data, _ = api(
+                    "PATCH",
+                    f"/root-admin/users/{edit_id}",
+                    json={
+                        "username": username.strip(),
+                        "user_email": email.strip(),
+                        "phone_no": phone.strip(),
+                        "theatre_id": theatre_id,
+                    },
+                )
+
+                if ok:
+                    st.session_state.pop("edit_admin_id", None)
+                    flash("Theatre admin updated successfully.")
+                    st.rerun()
+                else:
+                    st.error(data)
+
+    # Confirm deletion
+    delete_id = st.session_state.get("delete_admin_id")
+    delete_admin = next(
+        (a for a in admins if a["user_id"] == delete_id),
+        None,
+    )
+
+    if delete_admin:
+        st.warning(
+            f"Are you sure you want to permanently delete "
+            f"{delete_admin['username']}?"
+        )
+
+        confirm_col, cancel_col = st.columns(2)
+
+        if confirm_col.button(
+            "Confirm Delete",
+            key="confirm_delete_admin",
+            type="primary",
+        ):
+            ok, data, _ = api(
+                "DELETE",
+                f"/root-admin/users/{delete_id}",
+            )
+
+            if ok:
+                st.session_state.pop("delete_admin_id", None)
+                st.session_state.pop("edit_admin_id", None)
+                flash("Theatre admin deleted successfully.")
+                st.rerun()
+            else:
+                st.error(data)
+
+        if cancel_col.button(
+            "Cancel",
+            key="cancel_delete_admin",
+        ):
+            st.session_state.pop("delete_admin_id", None)
+            st.rerun()
 
 def users_page():
     left, right = st.columns([1, 2])

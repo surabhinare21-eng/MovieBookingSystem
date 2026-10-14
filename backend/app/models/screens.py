@@ -1,5 +1,5 @@
 
-from sqlalchemy import Boolean, Integer, ForeignKey
+from sqlalchemy import Boolean, Integer, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.db.base import Base
@@ -23,23 +23,33 @@ class Screen(Base):
         nullable=False
     )
 
+    screen_name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+
+    seat_layout_name: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+    )
+
     screen_is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
         nullable=False
     )
 
-    total_rows: Mapped[int] = mapped_column(
-        Integer,
-        default=0,
-        nullable=False
-    )
+    # total_rows: Mapped[int] = mapped_column(
+    #     Integer,
+    #     default=0,
+    #     nullable=False
+    # )
 
-    total_cols: Mapped[int] = mapped_column(
-        Integer,
-        default=0,
-        nullable=False
-    )
+    # total_cols: Mapped[int] = mapped_column(
+    #     Integer,
+    #     default=0,
+    #     nullable=False
+    # )
 
     theatre: Mapped["Theatre"] = relationship(
         back_populates="screens"

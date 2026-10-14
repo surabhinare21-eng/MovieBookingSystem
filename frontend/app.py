@@ -1090,7 +1090,7 @@ from pages.theatre_admin import (
     screens_page,
     shows_page,
 )
-from pages.catalog import movies_page
+from pages.catalog import movies_page, manage_movies_page
 from pages.super_admin import (
     overview_page,
     cities_page,
@@ -1229,9 +1229,14 @@ if not user:
 elif user["role"] == "CUSTOMER":
     customer_home()
 
+
 elif user["role"] == "ADMIN":
     st.header("Theatre admin")
 
+    if "screen_page" not in st.session_state:
+        st.session_state.screen_page = "list"
+
+    
     render_tabs({
         "My theatre": my_theatre_page,
         "Screens": screens_page,
@@ -1239,18 +1244,26 @@ elif user["role"] == "ADMIN":
         "My profile": profile_page,
     })
 
+
+
 elif user["role"] == "SUPER_ADMIN":
     st.header("Super admin")
 
+    if "movie_page" not in st.session_state:
+        st.session_state.movie_page = "list"
+
+    
     render_tabs({
         "Overview": overview_page,
         "Cities": cities_page,
         "Theatres": theatres_page,
         "Theatre admins": theatre_admins_page,
-        "Movies": movies_page,
+        "Movies": manage_movies_page,
         "Users": users_page,
         "My profile": profile_page,
     })
+    
+
 
 else:
     st.error(f"Unknown role: {user['role']}")

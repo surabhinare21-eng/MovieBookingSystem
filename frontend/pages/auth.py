@@ -13,7 +13,6 @@ def auth_screen():
     with middle:
         login_tab, signup_tab = st.tabs(["Log in", "Sign up"])
 
-        # ---------------- LOGIN ----------------
         with login_tab:
             with st.form("login_form"):
                 email = st.text_input("Email", key="login_email")
