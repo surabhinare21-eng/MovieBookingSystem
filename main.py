@@ -14,9 +14,12 @@ from backend.app.routers.show import router as show_router
 from backend.app.routers.screen import router as screen_router
 from backend.app.routers.movie import router as movie_router
 from backend.app.routers.city import router as city_router
-from backend.app.models.shows import Show  
-from backend.app.models.screens import Screen  # noqa: F401
-from backend.app.models.movies import Movie    # noqa: F401
+from backend.app.routers.public_theatre import router as public_theatre_router
+from backend.app.routers.public_screen import (
+    router as public_screen_router,
+)
+from backend.app.routers.public_show import router as public_show_router
+    
 
 
 @asynccontextmanager
@@ -48,6 +51,9 @@ app.include_router(show_router)
 app.include_router(screen_router)
 app.include_router(movie_router)
 app.include_router(city_router)
+app.include_router(public_theatre_router)
+app.include_router(public_screen_router)
+app.include_router(public_show_router)
 
 
 @app.get("/")
