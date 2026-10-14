@@ -48,3 +48,4 @@ def update_my_theatre(
     db.commit()
     db.refresh(theatre)
     return theatre
+

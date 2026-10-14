@@ -1,8 +1,8 @@
 from sqlalchemy import text,String, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.app.db.base import Base
 from backend.app.models.show_enums import ShowLanguages, ShowFormat
-
+from sqlalchemy import Time
 
 
 
@@ -19,7 +19,8 @@ class Movie(Base):
     movie_poster_url : Mapped[str] = mapped_column(String(50), nullable=False)
     
     movie_rating : Mapped[int] = mapped_column(Integer)
-    from sqlalchemy.orm import Mapped, mapped_column, relationship
+    movie_duration : Mapped[Time] = mapped_column(Time, nullable=False)
+    
 
 # Inside class Movie(Base):
 

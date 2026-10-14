@@ -101,7 +101,18 @@ def update_theatre(db, theatre_id, name, city, address) -> Theatre:
 
     return theatre
 
+def get_theatres_by_city(db, city_id: int):
+    city = db.get(City, city_id)
 
+    if city is None or not city.is_active:
+        return []
+
+    return db.scalars(
+        select(Theatre).where(
+            Theatre.city_id == city_id,
+            Theatre.is_active.is_(True),
+        )
+    ).all()
 
 def set_theatre_active(db, theatre_id: int, is_active: bool) -> Theatre:
     theatre = db.get(Theatre, theatre_id)
