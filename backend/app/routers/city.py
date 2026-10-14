@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.app.core.permissions import require_roles
@@ -44,3 +45,36 @@ def change_theatre_status(city_id: int, payload: ActiveStatus, db: Session = Dep
         return admin_service.set_city_active(db, city_id, payload.is_active)
     except LookupError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+   
+
+
+@router.delete("/cities/{city_id}")
+def delete_city(
+    city_id: int,
+    db: Session = Depends(get_db),
+):
+    city = db.get(City, city_id)
+
+    if city is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="City not found.",
+        )
+
+    try:
+        db.delete(city)
+        db.commit()
+
+        return {
+            "message": f"City '{city.name}' deleted successfully."
+        }
+
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "Cannot delete this city because it is "
+                "referenced by another record, such as a theatre."
+            ),
+        )
