@@ -29,6 +29,9 @@ def log_out(notice: str | None = None) -> None:
     st.session_state["token"] = None
     st.session_state["user"] = None
     st.session_state["notice"] = notice
+    for key in list(st.session_state.keys()):
+        if key.startswith("booking_"):
+            del st.session_state[key]
 
 
 # --------------------------------------------------

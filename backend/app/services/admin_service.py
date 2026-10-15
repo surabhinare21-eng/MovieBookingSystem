@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select , func
 
 from backend.app.core.security import hash_password
 from backend.app.models.theatre import Theatre
@@ -8,7 +8,7 @@ from backend.app.models.user import Role, User
 
 def create_city(db, name) -> City:
     exists = db.scalar(
-        select(City).where(City.name == name.strip())
+        select(City).where(func.lower(City.name) == name.strip().lower())
     )
     if exists:
         raise ValueError("A City with this name already exists.")
@@ -19,7 +19,7 @@ def create_city(db, name) -> City:
     db.refresh(city)
     return city
 
-def set_city_active(db,name,city_id:int,is_active:bool)-> City:
+def set_city_active(db,city_id:int,is_active:bool)-> City:
     city = db.get(City,city_id)
     if city is None:
         raise LookupError("City not found")

@@ -5,8 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import engine
 from backend.app.db.base import Base
-from backend.app.models.user import User        # noqa: F401
-from backend.app.models.theatre import Theatre  # noqa: F401
+from backend.app.models.user import User       
+from backend.app.models.theatre import Theatre  
+
 from backend.app.routers.auth import router as auth_router
 from backend.app.routers.root_admin import router as root_admin_router
 from backend.app.routers.theatre_admin import router as theatre_admin_router
@@ -14,11 +15,14 @@ from backend.app.routers.show import router as show_router
 from backend.app.routers.screen import router as screen_router
 from backend.app.routers.movie import router as movie_router
 from backend.app.routers.city import router as city_router
+from backend.app.routers.public_city import router as public_city_router
+from backend.app.routers.public_movie import router as public_movie_router
 from backend.app.routers.public_theatre import router as public_theatre_router
 from backend.app.routers.public_screen import (
     router as public_screen_router,
 )
 from backend.app.routers.public_show import router as public_show_router
+
     
 
 
@@ -54,6 +58,8 @@ app.include_router(city_router)
 app.include_router(public_theatre_router)
 app.include_router(public_screen_router)
 app.include_router(public_show_router)
+app.include_router(public_city_router)
+app.include_router(public_movie_router)
 
 
 @app.get("/")

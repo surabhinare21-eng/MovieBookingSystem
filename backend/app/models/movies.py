@@ -16,11 +16,12 @@ class Movie(Base):
     movie_status: Mapped[str] = mapped_column(String(100), nullable=False)
     
     movie_language: Mapped[ShowLanguages] = mapped_column(nullable=False)
-    movie_poster_url : Mapped[str] = mapped_column(String(50), nullable=False)
+    movie_poster_url : Mapped[str] = mapped_column(String(500), nullable=False)
+    movie_genre : Mapped[str | None] = mapped_column(String(100), nullable=True)
     
     movie_rating : Mapped[int] = mapped_column(Integer)
     movie_duration : Mapped[Time] = mapped_column(Time, nullable=False)
-    
+
 
 # Inside class Movie(Base):
 

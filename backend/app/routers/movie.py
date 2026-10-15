@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session 
+
 
 from backend.app.core.permissions import require_roles
 from backend.app.db.session import get_db
@@ -18,12 +19,11 @@ super_admin_only = require_roles(Role.SUPER_ADMIN)
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(super_admin_only)],
 )
-def create_movie(
-    payload: MovieCreate,
-    db: Session = Depends(get_db),
-):
-    return movie_service.create_movie(db, payload)
-
+def create_movie(payload: MovieCreate, db: Session = Depends(get_db)):
+    try:
+        return movie_service.create_movie(db, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 @router.get("/", response_model=list[MovieOut])
 def get_all_movies(db: Session = Depends(get_db)):

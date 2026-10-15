@@ -15,7 +15,8 @@ from pages.admin.shows import shows_page
 from pages.admin.movies import movies_page
 from pages.admin.theatre_admi import theatre_admins_page
 from pages.admin.theatres import theatres_page, my_theatre_page
-from pages.customer.demo import demo_theatre_page
+from pages.customer.flow import customer_flow
+
 
 # --------------------------------------------------
 # 1. Application configuration
@@ -144,7 +145,7 @@ if not user:
     auth_screen()
 
 elif user["role"] == "CUSTOMER":
-    demo_theatre_page()
+    customer_flow()
 
 
 elif user["role"] == "ADMIN":
@@ -184,4 +185,3 @@ elif user["role"] == "SUPER_ADMIN":
 
 else:
     st.error(f"Unknown role: {user['role']}")
-    

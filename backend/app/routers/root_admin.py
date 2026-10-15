@@ -80,12 +80,6 @@ def remove_theatre(
 def list_theatres(db: Session = Depends(get_db)):
     return list(db.scalars(select(Theatre).order_by(Theatre.theatre_id)))
 
-@router.get("/public")
-def list_public_theatres(
-    city_id: int,
-    db: Session = Depends(get_db),
-):
-    return get_theatres_by_city(db, city_id)
 @router.patch("/theatres/{theatre_id}/status", response_model=TheatreOut)
 def change_theatre_status(theatre_id: int, payload: ActiveStatus, db: Session = Depends(get_db)):
     try:
