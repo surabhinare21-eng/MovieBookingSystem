@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-
+# from backend.app.routers.payment import router as payment_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

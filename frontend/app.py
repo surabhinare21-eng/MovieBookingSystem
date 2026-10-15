@@ -1076,11 +1076,237 @@
 # else:
 #     st.error(f"Unknown role: {user['role']}")
 
+# """Main entry point for the Movie Ticket Booking System."""
+
+# import streamlit as st
+
+# from api import DEFAULT_API_URL
+# from common import ROLE_LABELS, log_out
+
+# from pages.auth import auth_screen
+# from pages.profile import profile_page, customer_home
+# from pages.theatre_admin import (
+#     my_theatre_page,
+#     screens_page,
+#     shows_page,
+# )
+# from pages.catalog import movies_page, manage_movies_page
+# from pages.super_admin import (
+#     overview_page,
+#     cities_page,
+#     theatres_page,
+#     theatre_admins_page,
+#     users_page,
+# )
+
+
+# # --------------------------------------------------
+# # 1. Application configuration
+# # --------------------------------------------------
+
+# st.set_page_config(
+#     page_title="Movie Booking System",
+#     layout="wide",
+# )
+
+# # Hide Streamlit's automatic multipage navigation
+# st.markdown(
+#     """
+#     <style>
+#         [data-testid="stSidebarNav"] {
+#             display: none;
+#         }
+#     </style>
+#     """,
+#     unsafe_allow_html=True,
+# )
+
+
+# # --------------------------------------------------
+# # 2. Initialize session state
+# # --------------------------------------------------
+
+# for key in ("token", "user", "flash", "notice"):
+#     if key not in st.session_state:
+#         st.session_state[key] = None
+
+# if "pending_signup_email" not in st.session_state:
+#     st.session_state.pending_signup_email = ""
+
+# if "signup_success" not in st.session_state:
+#     st.session_state.signup_success = False
+
+
+# # --------------------------------------------------
+# # 3. Backend connection settings
+# # --------------------------------------------------
+
+# with st.sidebar.expander("Connection"):
+#     st.text_input(
+#         "Backend URL",
+#         value=DEFAULT_API_URL,
+#         key="backend_url",
+#     )
+
+
+# # --------------------------------------------------
+# # 4. Sidebar user information and logout
+# # --------------------------------------------------
+
+# user = st.session_state.user
+
+# if user:
+#     st.sidebar.markdown(f"### {user['username']}")
+
+#     st.sidebar.caption(
+#         ROLE_LABELS.get(user["role"], user["role"])
+#     )
+
+#     if st.sidebar.button("Log out", key="logout_button"):
+#         log_out()
+#         st.rerun()
+
+
+# # --------------------------------------------------
+# # 5. Application title and notifications
+# # --------------------------------------------------
+
+# st.title("Movie Ticket Booking System")
+
+# if st.session_state.notice:
+#     st.warning(st.session_state.notice)
+#     st.session_state.notice = None
+
+# if st.session_state.flash:
+#     st.success(st.session_state.flash)
+#     st.session_state.flash = None
+
+
+# # --------------------------------------------------
+# # 6. Reusable tab renderer
+# # --------------------------------------------------
+
+
+# def render_tabs(screens: dict) -> None:
+#     """Render pages while preserving the selected page on rerun."""
+
+#     state_key = f"selected_page_{st.session_state.user['role']}"
+#     page_names = list(screens.keys())
+
+#     if (
+#         state_key not in st.session_state
+#         or st.session_state[state_key] not in page_names
+#     ):
+#         st.session_state[state_key] = page_names[0]
+
+#     selected_page = st.session_state[state_key]
+
+#     selected_page = st.radio(
+#         "Navigation",
+#         page_names,
+#         index=page_names.index(selected_page),
+#         horizontal=True,
+#         key=f"navigation_{st.session_state.user['role']}",
+#         label_visibility="collapsed",
+#     )
+
+#     st.session_state[state_key] = selected_page
+
+#     st.divider()
+#     screens[selected_page]()
+
+
+
+# # --------------------------------------------------
+# # 7. Role-based routing
+# # --------------------------------------------------
+
+# user = st.session_state.user
+
+# if not user:
+#     auth_screen()
+
+# elif user["role"] == "CUSTOMER":
+#     customer_home()
+
+
+# elif user["role"] == "ADMIN":
+#     st.header("Theatre admin")
+
+#     if "screen_page" not in st.session_state:
+#         st.session_state.screen_page = "list"
+
+    
+#     render_tabs({
+#         "My theatre": my_theatre_page,
+#         "Screens": screens_page,
+#         "Show Scheduling": shows_page,
+#         "My profile": profile_page,
+#     })
+
+
+
+# elif user["role"] == "SUPER_ADMIN":
+#     st.header("Super admin")
+
+#     if "movie_page" not in st.session_state:
+#         st.session_state.movie_page = "list"
+
+    
+#     render_tabs({
+#         "Overview": overview_page,
+#         "Cities": cities_page,
+#         "Theatres": theatres_page,
+#         "Theatre admins": theatre_admins_page,
+#         "Movies": manage_movies_page,
+#         "Users": users_page,
+#         "My profile": profile_page,
+#     })
+    
+
+
+# else:
+#     st.error(f"Unknown role: {user['role']}")
+    
+    
+    
+
+
+# # --------------------------------------------------
+# # 8. Payment 
+# # --------------------------------------------------
+# def payment_page():
+#     st.subheader("Payment (dummy booking)")
+#     st.caption("Abhi booking dummy hai: 2 seats x Rs.250 = Rs.500, 10 minute mein expire.")
+
+#     booking_id = st.number_input("Booking ID", min_value=1, value=1, step=1, key="pay_booking_id")
+
+#     if st.button("Pay now", key="pay_now"):
+#         ok, data, _ = api("POST", "/payments/create-link", json={"booking_id": int(booking_id)})
+#         if ok:
+#             st.session_state.payment_info = data
+#         else:
+#             st.error(data)
+
+#     info = st.session_state.get("payment_info")
+#     if info:
+#         st.write(f"Total amount: Rs.{info['total_amount']}")
+#         st.link_button("Open payment page", info["payment_url"])
+
+#         if st.button("Check payment status", key="check_payment"):
+#             ok, data, _ = api("GET", f"/payments/status/{info['booking_id']}")
+#             if ok:
+#                 if data["payment_status"] == "SUCCESS":
+#                     st.success("Payment successful. Booking confirmed.")
+#                 else:
+#                     st.warning("Payment not completed yet.")
+#             else:
+#                 st.error(data)    
 """Main entry point for the Movie Ticket Booking System."""
 
 import streamlit as st
 
-from api import DEFAULT_API_URL
+from api import DEFAULT_API_URL, call  # CHANGED: `call` bhi import kiya (payment ke liye)
 from common import ROLE_LABELS, log_out
 
 from pages.auth import auth_screen
@@ -1126,7 +1352,8 @@ st.markdown(
 # 2. Initialize session state
 # --------------------------------------------------
 
-for key in ("token", "user", "flash", "notice"):
+# CHANGED: "payment_info" add kiya
+for key in ("token", "user", "flash", "notice", "payment_info"):
     if key not in st.session_state:
         st.session_state[key] = None
 
@@ -1216,9 +1443,80 @@ def render_tabs(screens: dict) -> None:
     screens[selected_page]()
 
 
+# --------------------------------------------------
+# 7. Payment (NEW)
+# NOTE: Ye section routing se PEHLE hona zaroori hai,
+# warna function define hone se pehle hi call ho jata hai.
+# --------------------------------------------------
+
+
+def _payment_api(method: str, path: str, **kwargs):
+    """Backend ko saved token ke saath call karta hai."""
+    api_url = st.session_state.get("backend_url", DEFAULT_API_URL)
+    return call(
+        method,
+        api_url,
+        path,
+        token=st.session_state.get("token"),
+        **kwargs,
+    )
+
+
+def payment_page():
+    st.subheader("Payment (dummy booking)")
+    st.caption("Abhi booking dummy hai: 2 seats x Rs.250 = Rs.500, 10 minute mein expire.")
+
+    booking_id = st.number_input(
+        "Booking ID", min_value=1, value=1, step=1, key="pay_booking_id"
+    )
+
+    if st.button("Pay now", key="pay_now"):
+        ok, data, _ = _payment_api(
+            "POST", "/payments/create-link", json={"booking_id": int(booking_id)}
+        )
+        if ok:
+            st.session_state.payment_info = data
+        else:
+            st.error(data)
+
+    info = st.session_state.get("payment_info")
+    if info:
+        st.write(f"Total amount: Rs.{info['total_amount']}")
+        st.link_button("Open payment page", info["payment_url"])
+
+        if st.button("Check payment status", key="check_payment"):
+            ok, data, _ = _payment_api("GET", f"/payments/status/{info['booking_id']}")
+            if ok:
+                if data["payment_status"] == "SUCCESS":
+                    st.success("Payment successful. Booking confirmed.")
+                else:
+                    st.warning("Payment not completed yet.")
+            else:
+                st.error(data)
+
+#----------------------------------------------------------------------------------------------------------------------
+
+# def create_payment_order(amount, receipt_id):
+#     url = f"{BACKEND_URL}/payments/create-order"
+#     response = requests.post(url, json={"amount": amount, "receipt_id": receipt_id})
+#     if response.status_code == 200:
+#         return response.json().get("order")
+#     else:
+#         raise Exception(response.text)
+
+# def verify_payment_on_backend(order_id, payment_id, signature):
+#     url = f"{BACKEND_URL}/payments/verify-payment"
+#     payload = {
+#         "razorpay_order_id": order_id,
+#         "razorpay_payment_id": payment_id,
+#         "razorpay_signature": signature
+#     }
+#     response = requests.post(url, json=payload)
+#     return response.status_code == 200
+
 
 # --------------------------------------------------
-# 7. Role-based routing
+# 8. Role-based routing
 # --------------------------------------------------
 
 user = st.session_state.user
@@ -1227,7 +1525,11 @@ if not user:
     auth_screen()
 
 elif user["role"] == "CUSTOMER":
-    customer_home()
+    # CHANGED: pehle sirf customer_home() tha, ab Home + Payment tabs
+    render_tabs({
+        "Home": customer_home,
+        "Payment": payment_page,
+    })
 
 
 elif user["role"] == "ADMIN":
@@ -1236,7 +1538,7 @@ elif user["role"] == "ADMIN":
     if "screen_page" not in st.session_state:
         st.session_state.screen_page = "list"
 
-    
+
     render_tabs({
         "My theatre": my_theatre_page,
         "Screens": screens_page,
@@ -1252,7 +1554,7 @@ elif user["role"] == "SUPER_ADMIN":
     if "movie_page" not in st.session_state:
         st.session_state.movie_page = "list"
 
-    
+
     render_tabs({
         "Overview": overview_page,
         "Cities": cities_page,
@@ -1262,7 +1564,7 @@ elif user["role"] == "SUPER_ADMIN":
         "Users": users_page,
         "My profile": profile_page,
     })
-    
+
 
 
 else:
