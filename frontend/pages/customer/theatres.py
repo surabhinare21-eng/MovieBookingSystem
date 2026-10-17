@@ -178,11 +178,16 @@ def theatres_page():
                         use_container_width=True,
                         help=details or None,
                     ):
+                        # Save show context for the dedicated seat-selection page.
                         st.session_state.booking_theatre_id = theatre_id
+                        st.session_state.booking_theatre_name = theatre.get("name", "Selected Theatre")
+                        st.session_state.booking_movie_title = movie.get("movie_title", "Selected Movie")
                         st.session_state.booking_date = selected_date
                         st.session_state.booking_show_id = show["show_id"]
                         st.session_state.booking_screen_id = show["screen_id"]
                         st.session_state.booking_seat_ids = []
+                        st.session_state.pop("booking_requested_count", None)
+                        st.session_state["booking_show_price_dialog"] = False
                         st.session_state.booking_step = "seats"
                         st.rerun()
 

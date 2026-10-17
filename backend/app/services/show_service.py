@@ -5,7 +5,7 @@ from sqlalchemy import select, and_
 from backend.app.models.shows import Show
 from backend.app.models.movies import Movie
 from backend.app.schemas.show import ShowCreate, ShowUpdate
-
+from backend.app.services.seat_service import ensure_seats_for_screen
 
 def get_show(db, show_id):
     return db.scalar(
@@ -110,6 +110,13 @@ def create_show(db, show_data: ShowCreate):
         start_time=start_time,
         end_time=end_time,
     )
+    
+        # Generate the screen's seats automatically if they do not exist.
+    ensure_seats_for_screen(
+        db=db,
+        screen_id=show_data.screen_id,
+    )
+    
 
     show_values = show_data.model_dump(
         exclude={"show_end_time"}
