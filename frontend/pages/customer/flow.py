@@ -26,6 +26,10 @@ def customer_flow():
         # This is a dedicated booking step/page; no timing-page controls are rendered here.
         seats_page()
     elif step == "payment":
+        payments_page()
+        
+        
+        
         st.subheader("Payment")
         st.info("Your seats are held for five minutes. Connect the payment workflow here.")
         if st.button("Back to seat selection"):

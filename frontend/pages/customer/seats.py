@@ -159,7 +159,7 @@ def seats_page():
                     # Held seats are unavailable; do not expose the internal HOLD status.
                     icon, disabled = "🔴", True
                 elif is_selected:
-                    icon, disabled = "🔴", False
+                    icon, disabled = "Booked", False
                 else:
                     icon, disabled = "🟢", False
                 with col:
