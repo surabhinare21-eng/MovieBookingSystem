@@ -209,8 +209,22 @@ def screens_page():
     st.divider()
 
     # ---------------- ALL SCREENS ----------------
-    st.subheader("All Screens")
+    header_col, button_col = st.columns([5, 1])
 
+    with header_col:
+        st.subheader("screens")
+
+    with button_col:
+        if st.button(
+            "hide" if st.session_state.get("show_screens_list", False) else "view",
+            key="toggle_screens_list",
+        ):
+            st.session_state.show_screens_list = (
+                not st.session_state.get("show_screens_list", False)
+            )
+
+    if not st.session_state.get("show_screens_list", False):
+        return
     if st.button("Refresh Screens", key="refresh_screens"):
         st.rerun()
 
@@ -223,68 +237,70 @@ def screens_page():
     if not screens:
         st.info("No screens have been added yet.")
         return
+    
+    search_query = st.text_input(
+        "Search screen",
+        placeholder="Search by name",
+        key="screen_catalogue_search",        
+    ).strip().lower()
+    filtered_screens = [
+        screen
+        for screen in screens
+        if (
+            search_query in str(screen["screen_name"]).lower()
+            
+        )
+    ]
 
-    show_table(
-        [
-            {
-                "Screen ID": screen["screen_id"],
-                "Screen Name": screen["screen_name"],
-                "Seat Layout": screen["seat_layout_name"],
-                "Total Seats": LAYOUTS.get(
-                    screen["seat_layout_name"], {}
-                ).get("seats", "N/A"),
-                "Status": active_text(screen["screen_is_active"]),
-            }
-            for screen in screens
-        ],
-        {
-            "Screen ID": "Screen ID",
-            "Screen Name": "Screen Name",
-            "Seat Layout": "Seat Layout",
-            "Total Seats": "Total Seats",
-            "Status": "Status",
-        },
+    if not filtered_screens:
+        st.info("No screens match your search.")
+        return
+
+        # --- TABLE HEADER ---
+    # Create the column layout structure for the grid table
+    hdr_id, hdr_name, hdr_layout, hdr_seats, hdr_status, hdr_actions = st.columns(
+        [1, 2, 1.5, 1, 1, 3.5]
     )
+    
+    with hdr_id: st.markdown("**Screen ID**")
+    with hdr_name: st.markdown("**Screen Name**")
+    with hdr_layout: st.markdown("**Seat Layout**")
+    with hdr_seats: st.markdown("**Total Seats**")
+    with hdr_status: st.markdown("**Status**")
+    with hdr_actions: st.markdown("**Actions**")
+    
+    st.divider() # Sub-header underline separator
 
-    st.caption("Manage individual screens below.")
-
-    # ---------------- PER-ROW ACTIONS ----------------
-    for screen in screens:
+    # --- TABLE ROWS WITH INTEGRATED ACTIONS ---
+    for screen in filtered_screens:
         screen_id = screen["screen_id"]
-
-        with st.container(border=True):
-            details_col, edit_col, preview_col, delete_col = st.columns(
-                [4, 1, 1.4, 1]
+        
+        # Wrapping each row entry inside a slight frame container for neatness
+        with st.container():
+            col_id, col_name, col_layout, col_seats, col_status, col_actions = st.columns(
+                [1, 2, 1.5, 1, 1, 3.5]
             )
-
-            with details_col:
-                st.markdown(f"**{screen['screen_name']}**")
-                st.caption(
-                    f"ID: {screen_id} · "
-                    f"{screen['seat_layout_name']} · "
-                    f"{LAYOUTS.get(screen['seat_layout_name'], {}).get('seats', 'N/A')} seats"
-                )
-
-            with edit_col:
-                if st.button(
-                    "Edit",
-                    key=f"edit_screen_{screen_id}",
-                    use_container_width=True,
-                ):
-                    edit_screen_dialog(screen)
-
-            with preview_col:
-                if st.button(
-                    "View Layout",
-                    key=f"preview_screen_{screen_id}",
-                    use_container_width=True,
-                ):
-                    seat_layout_dialog(screen)
-
-            with delete_col:
-                if st.button(
-                    "Delete",
-                    key=f"delete_screen_{screen_id}",
-                    use_container_width=True,
-                ):
-                    delete_screen_dialog(screen)
+            
+            # Populate Data cells
+            col_id.write(str(screen_id))
+            col_name.write(screen["screen_name"])
+            col_layout.write(screen["seat_layout_name"])
+            col_seats.write(str(LAYOUTS.get(screen["seat_layout_name"], {}).get("seats", "N/A")))
+            col_status.write(active_text(screen["screen_is_active"]))
+            
+            # Populate Action Cells Side-by-Side inside the same row structure
+            with col_actions:
+                btn_edit, btn_view, btn_del = st.columns(3, gap="small")
+                
+                with btn_edit:
+                    if st.button("Edit", key=f"tbl_edit_{screen_id}", use_container_width=True):
+                        edit_screen_dialog(screen)
+                        
+                with btn_view:
+                    if st.button("Layout", key=f"tbl_view_{screen_id}", use_container_width=True):
+                        seat_layout_dialog(screen)
+                        
+                with btn_del:
+                    if st.button("Delete", key=f"tbl_del_{screen_id}", type="secondary", use_container_width=True):
+                        delete_screen_dialog(screen)
+        st.divider()
