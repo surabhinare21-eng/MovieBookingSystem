@@ -1,10 +1,12 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from backend.app.core.dependencies import get_current_user
 from backend.app.db.session import get_db
 from backend.app.models.user import User
+from backend.app.models.booking import Booking
 from backend.app.schemas.seat import (
     SeatForShowOut,
     SeatLockCreate,
@@ -46,12 +48,36 @@ def lock_show_seats(
     current_user: User = Depends(get_current_user),
 ):
     try:
-        return seat_service.lock_seats_for_show(
+        locks = seat_service.lock_seats_for_show(
             db=db,
             show_id=request.show_id,
             seat_ids=request.seat_ids,
             user_id=current_user.user_id,
         )
+        booking = db.scalar(
+            select(Booking)
+            .where(
+                Booking.show_id == request.show_id,
+                Booking.user_id == current_user.user_id,
+                Booking.status == "PENDING",
+            )
+            .order_by(Booking.booking_id.desc())
+        )
+        booking_id = booking.booking_id if booking else None
+        return [
+            {
+                "lock_id": lock.lock_id,
+                "show_id": lock.show_id,
+                "seat_id": lock.seat_id,
+                "user_id": lock.user_id,
+                "screen_id": lock.screen_id,
+                "locked_at": lock.locked_at,
+                "expires_at": lock.expires_at,
+                "lock_status": lock.lock_status,
+                "booking_id": booking_id,
+            }
+            for lock in locks
+        ]
 
     except ValueError as exc:
         message = str(exc)

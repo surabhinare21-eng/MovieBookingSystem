@@ -4,6 +4,7 @@ from pages.customer.cities import cities_page
 from pages.customer.movies import movies_page
 from pages.customer.theatres import theatres_page
 from pages.customer.seats import seats_page
+from pages.customer.payment import payments_page
 
 
 def customer_flow():
@@ -27,11 +28,11 @@ def customer_flow():
         seats_page()
     elif step == "payment":
         payments_page()
-        
+        if st.button("Back to seat selection"):
+            st.session_state["booking_step"] = "seats"
+            st.rerun()
         
         
         st.subheader("Payment")
         st.info("Your seats are held for five minutes. Connect the payment workflow here.")
-        if st.button("Back to seat selection"):
-            st.session_state["booking_step"] = "seats"
-            st.rerun()
+

@@ -59,5 +59,6 @@ class SeatLockOut(BaseModel):
     locked_at: datetime
     expires_at: datetime
     lock_status: str
+    booking_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)

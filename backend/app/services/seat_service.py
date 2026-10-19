@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from backend.app.models.screens import Screen
 from backend.app.models.shows import Show
 from backend.app.models.seat import Seat, SeatLock
+from backend.app.models.booking import Booking
 from datetime import datetime, timedelta
 from sqlalchemy import select, update
 
@@ -262,9 +263,22 @@ def lock_seats_for_show(
             db.add(lock)
             new_locks.append(lock)
 
+        total_amount = sum(
+            180 if seat.seat_type.upper() == "PLATINUM" else 160
+            for seat in seats
+        )
+        booking = Booking(
+            user_id=user_id,
+            show_id=show_id,
+            total_amount=total_amount,
+            status="PENDING",
+        )
+        db.add(booking)
+
         # 5. Commit every hold together.
         db.commit()
 
+        db.refresh(booking)
         for lock in new_locks:
             db.refresh(lock)
 
