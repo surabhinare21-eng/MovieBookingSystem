@@ -11,6 +11,8 @@ from backend.app.models.theatre import Theatre  # noqa: F401
 from backend.app.models.screens import Screen  # noqa: F401
 from backend.app.models.shows import Show  # noqa: F401
 from backend.app.models.movies import Movie  # noqa: F401
+from backend.app.models.booking import Booking  # noqa: F401
+from backend.app.models.payment import Payment  # noqa: F401
 
 load_dotenv()
 

@@ -3,6 +3,8 @@ import streamlit as st
 from pages.customer.cities import cities_page
 from pages.customer.movies import movies_page
 from pages.customer.theatres import theatres_page
+from pages.customer.seats import seats_page
+from pages.customer.payment import payments_page
 
 
 def customer_flow():
@@ -12,6 +14,7 @@ def customer_flow():
         step = "cities"
     if step in ("theatres", "seats") and not st.session_state.get("booking_movie_id"):
         step = "movies"
+
     st.session_state["booking_step"] = step
 
     if step == "cities":
@@ -19,12 +22,17 @@ def customer_flow():
     elif step == "movies":
         movies_page()
     elif step == "theatres":
-        if st.button("← Back to movies", key="back_to_movies"):
-            st.session_state["booking_step"] = "movies"
-            st.rerun()
         theatres_page()
     elif step == "seats":
-        if st.button("← Back to show timings", key="back_to_theatres"):
-            st.session_state["booking_step"] = "theatres"
+        # This is a dedicated booking step/page; no timing-page controls are rendered here.
+        seats_page()
+    elif step == "payment":
+        payments_page()
+        if st.button("Back to seat selection"):
+            st.session_state["booking_step"] = "seats"
             st.rerun()
-        st.info("Seat selection is the next screen to build.")
+        
+        
+        st.subheader("Payment")
+        st.info("Your seats are held for five minutes. Connect the payment workflow here.")
+

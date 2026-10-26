@@ -10,5 +10,6 @@ pydantic-extra-types==2.11.1
 pydantic
 phonenumbers
 pydantic[email]
-matplotlib
+
 geopy
+razorpay

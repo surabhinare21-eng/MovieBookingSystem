@@ -156,10 +156,26 @@ def shows_page():
                 st.error(data)
 
     st.divider()
-    st.subheader("Scheduled shows")
+    
+    header_col, button_col = st.columns([5, 1])
 
-    if st.button("Refresh shows", key="refresh_shows"):
-        st.rerun()
+    with header_col:
+        st.subheader("scheduled shows")
+
+    with button_col:
+        if st.button(
+            "hide" if st.session_state.get("show_shows_list", False) else "view",
+            key="toggle_shows_list",
+        ):
+            st.session_state.show_shows_list = (
+                not st.session_state.get("show_shows_list", False)
+            )
+
+    if not st.session_state.get("show_shows_list", False):
+        return
+
+    # if st.button("Refresh shows", key="refresh_shows"):
+    #     st.rerun()
 
     ok, shows, _ = api("GET", "/shows/")
 
