@@ -27,11 +27,11 @@ def superadmin_dashboard():
     with m_col2:
         st.metric(
             label="Total Theatre Admins",
-            value=data.get("total_theater_admin_count", 0),
+            value=data.get("total_theatre_admin_count", 0),
         )
     with m_col3:
         st.metric(
-            label="Total Theaters", value=data.get("total_theater_count", 0)
+            label="Total theatres", value=data.get("total_theatre_count", 0)
         )
     with m_col4:
         st.metric(label="Total Cities", value=data.get("total_cities", 0))
@@ -67,7 +67,7 @@ def superadmin_dashboard():
     m_left_col, m_right_col = st.columns(2)
 
     with m_left_col:
-        st.subheader("Theaters vs City Distribution")
+        st.subheader("theatres vs City Distribution")
         view_mode_city = st.radio(
             "Select Chart View (City)",
             ["Bar Chart", "Heatmap"],
@@ -75,7 +75,7 @@ def superadmin_dashboard():
             key="view_mode_city",
         )
 
-        ok_city, data_city, _ = api("GET", "/get_analytics/graphical_theater_city")
+        ok_city, data_city, _ = api("GET", "/get_analytics/graphical_theatre_city")
         if ok_city and isinstance(data_city, dict) and data_city:
             df_city = pd.DataFrame(
                 {
@@ -124,7 +124,7 @@ def superadmin_dashboard():
         )
 
         ok_scr, data_screen, _ = api(
-            "GET", "/get_analytics/graphical_screen_theater"
+            "GET", "/get_analytics/graphical_screen_theatre"
         )
         if ok_scr and isinstance(data_screen, dict) and data_screen:
             df_screen = pd.DataFrame(
@@ -170,11 +170,11 @@ def superadmin_dashboard():
     t_left_col, t_right_col = st.columns(2)
 
     with t_left_col:
-        st.subheader("All Theaters")
-        ok_t_list, theater_list, _ = api("GET", "/get_analytics/get_theater_list")
-        if ok_t_list and isinstance(theater_list, list):
+        st.subheader("All theatres")
+        ok_t_list, theatre_list, _ = api("GET", "/get_analytics/get_theatre_list")
+        if ok_t_list and isinstance(theatre_list, list):
             st.dataframe(
-                pd.DataFrame(theater_list, columns=["Theatre Names"]),
+                pd.DataFrame(theatre_list, columns=["Theatre Names"]),
                 width="stretch",
                 height=300,
             )
@@ -198,7 +198,7 @@ def superadmin_dashboard():
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Theatre Admins")
-        ok_a, data_admin, _ = api("GET", "/get_analytics/theater_admin_list")
+        ok_a, data_admin, _ = api("GET", "/get_analytics/theatre_admin_list")
         if ok_a and isinstance(data_admin, list):
             admin_df = pd.DataFrame(data=data_admin)
             if admin_df.empty:

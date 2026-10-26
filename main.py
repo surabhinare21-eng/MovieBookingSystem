@@ -25,6 +25,8 @@ from backend.app.routers.public_show import router as public_show_router
 from backend.app.models.seat import Seat, SeatLock
 from backend.app.routers.seat import router as seat_router
 from backend.app.routers.payment import router as payment_router
+from backend.app.routers.superadmin_dashboard import router as superadmin_dashboard
+from backend.app.routers.theatreadmin_dashboard import router as theatreadmin_dashboard
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -62,7 +64,8 @@ app.include_router(public_city_router)
 app.include_router(public_movie_router)
 app.include_router(seat_router)
 app.include_router(payment_router)
-
+app.include_router(superadmin_dashboard)
+app.include_router(theatreadmin_dashboard)
 
 @app.get("/")
 def root():

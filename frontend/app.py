@@ -15,9 +15,9 @@ from pages.admin.shows import shows_page
 from pages.admin.movies import movies_page
 from pages.admin.theatre_admin import theatre_admins_page
 from pages.admin.theatres import theatres_page, my_theatre_page
-from pages.customer.demo import demo_theatre_page
 from pages.admin.superadmin_dashboard import superadmin_dashboard
-from pages.admin.theateradmin_dashboard import theateradmin_dashboard
+from pages.admin.theatreadmin_dashboard import theatreadmin_dashboard
+from pages.customer.flow import customer_flow
 
 # --------------------------------------------------
 # 1. Application configuration
@@ -146,7 +146,7 @@ if not user:
     auth_screen()
 
 elif user["role"] == "CUSTOMER":
-    demo_theatre_page()
+    customer_flow()
 
 
 elif user["role"] == "ADMIN":
@@ -161,7 +161,7 @@ elif user["role"] == "ADMIN":
         "Screens": screens_page,
         "Show Scheduling": shows_page,
         "My profile": profile_page,
-        "Admin Dashboard": theateradmin_dashboard
+        "Admin Dashboard": theatreadmin_dashboard
     })
 
 

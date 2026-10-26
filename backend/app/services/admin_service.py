@@ -202,11 +202,11 @@ def get_total_analytics_count_superadmin(db, Users, Theatres, Cities, Movie):
     statement_total_users = select(func.count(Users.user_id)).where(Users.role == "CUSTOMER")
     total_customers = db.scalar(statement_total_users)
     
-    statement_theater_admin = select(func.count(Users.user_id)).where(Users.role == "ADMIN")
-    total_theater_admin = db.scalar(statement_theater_admin)
+    statement_theatre_admin = select(func.count(Users.user_id)).where(Users.role == "ADMIN")
+    total_theatre_admin = db.scalar(statement_theatre_admin)
     
-    statement_total_theater = select(func.count(Theatres.theatre_id))
-    total_theater = db.scalar(statement_total_theater)
+    statement_total_theatre = select(func.count(Theatres.theatre_id))
+    total_theatre = db.scalar(statement_total_theatre)
     
     statement_total_cities = select(func.count(Cities.city_id))
     total_cities = db.scalar(statement_total_cities)
@@ -216,8 +216,8 @@ def get_total_analytics_count_superadmin(db, Users, Theatres, Cities, Movie):
         
     return {
         "total_customers_count": total_customers,
-        "total_theater_admin_count": total_theater_admin,
-        "total_theater_count": total_theater,
+        "total_theatre_admin_count": total_theatre_admin,
+        "total_theatre_count": total_theatre,
         "total_cities": total_cities,
         "total_movies": total_movies
     }
@@ -229,7 +229,7 @@ def get_city_coordinates(db, Cities):
   
   return [dict(row) for row in city_coordinates]
   
-def graphs_theater_city(db, Theatre, Cities):
+def graphs_theatre_city(db, Theatre, Cities):
     results = (
     db.query(Cities.name, func.count(Theatre.theatre_id).label("theatre_count"))
     .join(Theatre, Cities.city_id == Theatre.city_id)
@@ -241,7 +241,7 @@ def graphs_theater_city(db, Theatre, Cities):
     
     return analytics_payload
 
-def graphs_screen_theater(db, Screen, Theatre):
+def graphs_screen_theatre(db, Screen, Theatre):
     results = (
         db.query(Theatre.name, func.count(Screen.screen_id).label("screen_count"))
         .join(Screen, Theatre.theatre_id == Screen.theatre_id) 
@@ -258,33 +258,33 @@ def get_movies_list(db, Movie):
     
     return movie_names
 
-def get_theaters_list(db, Theatre):
-    statement_theater_list = select(Theatre.name)
-    theater_list = db.execute(statement_theater_list).scalars().all()
+def get_theatres_list(db, Theatre):
+    statement_theatre_list = select(Theatre.name)
+    theatre_list = db.execute(statement_theatre_list).scalars().all()
     
-    return theater_list
+    return theatre_list
 
-def get_theater_admin_list(db, User):
-    statement_theater_admin_list = select(User.username, User.user_email, User.phone_no).where(User.role == "ADMIN")
-    theater_admin_list = db.execute(statement_theater_admin_list).all()
+def get_theatre_admin_list(db, User):
+    statement_theatre_admin_list = select(User.username, User.user_email, User.phone_no).where(User.role == "ADMIN")
+    theatre_admin_list = db.execute(statement_theatre_admin_list).all()
     
-    theater_admin_info = [
+    theatre_admin_info = [
         {"admin_name":admin_name, "email":email, "phone_no":phone_no}
-        for admin_name, email, phone_no in theater_admin_list
+        for admin_name, email, phone_no in theatre_admin_list
     ]
     
-    return theater_admin_info
+    return theatre_admin_info
 
-def get_theater_customer_list(db, User):
-    statement_theater_admin_list = select(User.username, User.user_email, User.phone_no).where(User.role == "CUSTOMER")
-    customer_list = db.execute(statement_theater_admin_list).all()
+def get_theatre_customer_list(db, User):
+    statement_theatre_admin_list = select(User.username, User.user_email, User.phone_no).where(User.role == "CUSTOMER")
+    customer_list = db.execute(statement_theatre_admin_list).all()
     
-    theater_admin_info = [
+    theatre_admin_info = [
         {"customer_name":cust_name, "email":email, "phone_no":phone_no}
         for cust_name, email, phone_no in customer_list
     ]
     
-    return theater_admin_info
+    return theatre_admin_info
 
 def get_customer_admin_para(db, User):
     date_label = func.cast(User.created_at, Date).label("date")
@@ -358,8 +358,38 @@ def get_city_list_admin(db, City):
     return city_list if city_list else "No added cities"
 
 def get_screen_list(admin_id, db, Screen):
-    statement = select(Screen.screen_name).where(Screen.theatre_id == admin_id)
-    screen_list = db.scalar(statement)
+    statement = select(Screen.screen_name, Screen.seat_layout_name).where(Screen.theatre_id == admin_id)
+    screen_list = db.execute(statement).mappings().all()
     
-    return screen_list if screen_list else "No screen added"
+    result = [
+        {"Screen Name": row["screen_name"], "Seat Layout": row["seat_layout_name"]} 
+        for row in screen_list]
+    
+    return result if result else "No screen added"
 
+def get_screen_show(admin_id, db, Screen, Show, Movies):
+    statement = (
+    select(
+        Screen.screen_name,
+        Movies.movie_title,
+        Movies.movie_language,
+        Movies.movie_duration
+    )
+    .join(Show, Screen.screen_id == Show.screen_id)
+    .join(Movies, Show.movie_id == Movies.movie_id)
+    .where(Screen.theatre_id == admin_id)
+    )
+
+    rows = db.execute(statement).mappings().all()
+
+    result = [
+        {
+            "Screen Name": row["screen_name"],
+            "Movie Title": row["movie_title"],
+            "Language": row["movie_language"],
+            "Duration": row["movie_duration"]
+        }
+        for row in rows
+    ]
+
+    return result if result else "No shows found"

@@ -15,6 +15,7 @@ from backend.app.services.admin_service import (
     get_city_name_admin,
     get_city_list_admin,
     get_screen_list,
+    get_screen_show,
 )
 
 router = APIRouter(prefix="/get_analytics_superadmin", tags=["Theatre Admin (ADMIN)"])
@@ -47,3 +48,6 @@ def get_city_list(db = Depends(get_db)):
 def get_screen_list_admin(admin_id, db = Depends(get_db)):
     return get_screen_list(admin_id, db, Screen)
 
+@router.get("/get_screen_shows_list")
+def get_screen_show_list_admin(admin_id, db=Depends(get_db)):
+    return get_screen_show(admin_id, db, Screen, Show, Movie)

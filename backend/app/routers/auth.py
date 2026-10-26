@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import smtplib
 import logging 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+
 
 from backend.app.core.dependencies import get_current_user
 from backend.app.core.security import hash_password
@@ -90,14 +91,14 @@ def verify_signup_email(payload: EmailVerification, db: Session = Depends(get_db
             detail="No pending registration found. Please sign up and request a new code.",
         )
 
-    if pending.expires_at < datetime.now():
+# Strip the timezone or use a naive UTC comparison
+    if pending.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
         db.delete(pending)
         db.commit()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The verification code has expired. Please sign up again to receive a new code.",
         )
-
     if pending.attempts >= MAX_OTP_ATTEMPTS:
         db.delete(pending)
         db.commit()
