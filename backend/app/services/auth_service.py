@@ -1,0 +1,84 @@
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from backend.app.core.security import (
+    create_access_token,
+    hash_password,
+    verify_password_and_update,
+)
+from backend.app.models.user import Role, User
+
+
+def register_customer(db, username, email, phone_no, password) -> User:
+    """
+    Register a new customer.
+
+    Customers cannot choose their own role or theatre assignment.
+    """
+    normalized_email = email.strip().lower()
+
+    existing_user = db.scalar(select(User).where(User.user_email == normalized_email))
+
+    if existing_user:
+        raise ValueError("An account with this email already exists.")
+
+    user = User(
+        username=username.strip(),
+        user_email=normalized_email,
+        phone_no=phone_no.strip(),
+        hashed_password=hash_password(password),
+        role=Role.CUSTOMER.value,
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+def login_user(
+    db: Session,
+    email: str,
+    password: str,
+) -> dict:
+    """Authenticate a user and return an access token."""
+
+    normalized_email = email.strip().lower()
+
+    user = db.scalar(
+        select(User).where(User.user_email == normalized_email)
+    )
+
+    if user is None:
+        raise ValueError("Invalid email or password.")
+    
+    if user.role == "ADMIN":
+        theatre_id = user.theatre_id
+    else:
+        theatre_id = None
+        
+    password_matches, updated_hash = verify_password_and_update(
+        password,
+        user.hashed_password,
+    )
+    if not password_matches:
+        raise ValueError("Invalid email or password.")
+
+    if updated_hash is not None:
+        user.hashed_password = updated_hash
+        db.commit()
+
+    if not user.is_active:
+        raise ValueError("This account has been deactivated.")
+
+    access_token = create_access_token(
+        user_id=user.user_id,
+        role=user.role
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "theatre_id": theatre_id
+    }
