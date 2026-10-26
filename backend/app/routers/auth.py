@@ -154,57 +154,6 @@ def verify_signup_email(payload: EmailVerification, db: Session = Depends(get_db
         },
     }
 
-# @router.post("/login")
-# async def login(
-#     request: Request,
-#     db: Session = Depends(get_db),
-# ):
-#     """Authenticate a user and return a JWT."""
-
-#     try:
-#         data = await request.json()
-#     except (ValueError, UnicodeDecodeError):
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Request body must contain valid JSON.",
-#         )
-
-#     if not isinstance(data, dict):
-#         raise HTTPException(
-#             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-#             detail="Request body must be a JSON object.",
-#         )
-
-#     email = get_required_text(data, "email")
-#     password = data.get("password")
-
-#     if not isinstance(password, str) or not password:
-#         raise HTTPException(
-#             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-#             detail="'password' is required.",
-#         )
-
-#     try:
-#         return login_user(
-#             db=db,
-#             email=email,
-#             password=password,
-#         )
-#     except ValueError as exc:
-#         message = str(exc)
-
-#         if message == "This account has been deactivated.":
-#             raise HTTPException(
-#                 status_code=status.HTTP_403_FORBIDDEN,
-#                 detail=message,
-#             )
-
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Invalid email or password.",
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
-
 
 @router.post("/login")
 def login(payload: UserLogin, db: Session = Depends(get_db)):

@@ -77,7 +77,11 @@ CHECKOUT_TEMPLATE = """
           showButton();
           return;
         }
+<<<<<<< HEAD
         show("Payment successful. Your booking is being confirmed.", "ok");
+=======
+        show("Payment successful! Return to the booking page and click Check payment status to see your ticket details.", "ok");
+>>>>>>> 0f26825 (replace project with the updated code)
       } catch (e) {
         show("Could not confirm payment. Check your booking status before retrying.", "err");
         showButton();
@@ -147,12 +151,69 @@ HIDE_CHROME = """
 """
 
 
+<<<<<<< HEAD
+=======
+def _return_home() -> None:
+    for key in (
+        "payment_order", "payment_booking_id", "booking_lock_seats",
+        "booking_show_id", "booking_seat_ids", "booking_total_amount",
+    ):
+        st.session_state.pop(key, None)
+    st.session_state["booking_step"] = "cities"
+    st.rerun()
+
+
+def _return_to_seats() -> None:
+    st.session_state.pop("payment_order", None)
+    st.session_state.pop("payment_booking_id", None)
+    st.session_state["booking_step"] = "seats"
+    st.rerun()
+
+
+def _show_success(details: dict, booking_id: int) -> None:
+    st.markdown(
+        "<div style='text-align:center;padding:24px 12px 12px'>"
+        "<div style='font-size:64px;line-height:1.1'>✅</div>"
+        "<h1 style='color:#15803d;font-size:42px;margin:12px 0'>"
+        "Your Payment is Successful!</h1></div>",
+        unsafe_allow_html=True,
+    )
+    st.divider()
+    col1, col2 = st.columns(2)
+    col1.metric("Total amount paid", f"₹{details.get('amount', '0.00')}")
+    col2.metric("Payment Type", details.get("payment_type") or "RAZORPAY")
+    st.write(f"**Paid at:** {details.get('paid_at') or 'Not available'}")
+    st.write(f"**Transaction ID:** {details.get('transaction_id') or 'Not available'}")
+    st.write(f"**Booking ID:** {booking_id}")
+    st.divider()
+    if st.button("VIEW YOUR BOOKINGS", type="primary", use_container_width=True):
+        st.session_state["customer_view"] = "my_bookings"
+        st.session_state["my_bookings_return_to_payment"] = booking_id
+        st.rerun()
+    if st.button("RETURN TO HOME PAGE", use_container_width=True):
+        _return_home()
+
+@st.fragment(run_every="2s")
+def watch_payment_status(booking_id: int):
+    """Automatically detect successful payment and display confirmation."""
+    ok, details, status_code = api(
+        "GET",
+        f"/payments/booking/{booking_id}"
+    )
+
+    if ok and details.get("payment_status") == "SUCCESS":
+        st.rerun()
+
+    st.caption("Waiting for payment confirmation...")
+
+>>>>>>> 0f26825 (replace project with the updated code)
 def payments_page() -> None:
     token = st.session_state.get("token")
     if not token:
         st.warning("Please log in before making a payment.")
         st.stop()
 
+<<<<<<< HEAD
     locks = st.session_state.get("booking_lock_seats", [])
     booking_id = locks[0].get("booking_id") if locks else None
     if booking_id is None:
@@ -170,10 +231,38 @@ def payments_page() -> None:
             ok, response, status_code = api("POST", f"/payments/create-order/{booking_id}")
             if not ok:
                 st.error(f"Could not create payment order (HTTP {status_code}): {response}")
+=======
+    booking_id = st.session_state.get("payment_booking_id")
+    locks = st.session_state.get("booking_lock_seats", [])
+    if booking_id is None and locks:
+        booking_id = locks[0].get("booking_id")
+    if booking_id is None:
+        st.error("Your seat hold has expired or is missing. Please select seats again.")
+        if st.button("BACK TO SEAT SELECTION", type="primary"):
+            _return_to_seats()
+        return
+
+    ok, details, status_code = api("GET", f"/payments/booking/{booking_id}")
+    if ok and details.get("payment_status") == "SUCCESS":
+        _show_success(details, booking_id)
+        return
+
+    order = st.session_state.get("payment_order")
+    st.title("💳 Booking Payment")
+    st.caption("Secure checkout powered by Razorpay.")
+
+    if order is None:
+        st.info("Your selected seats are held for 5 minutes.")
+        if st.button("Continue to payment", type="primary", use_container_width=True):
+            ok, response, code = api("POST", f"/payments/create-order/{booking_id}")
+            if not ok:
+                st.error(f"Could not create payment order (HTTP {code}): {response}")
+>>>>>>> 0f26825 (replace project with the updated code)
                 return
             st.session_state["payment_order"] = response
             st.session_state["payment_booking_id"] = booking_id
             st.rerun()
+<<<<<<< HEAD
         return
 
     # Step 2: show only the Razorpay form
@@ -181,3 +270,11 @@ def payments_page() -> None:
     render_checkout(order, token)
 
 
+=======
+        if st.button("BACK TO SEAT SELECTION", use_container_width=True):
+            _return_to_seats()
+        return
+
+    render_checkout(order, token)
+    watch_payment_status(booking_id)
+>>>>>>> 0f26825 (replace project with the updated code)

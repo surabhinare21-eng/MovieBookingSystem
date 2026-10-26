@@ -1,11 +1,16 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
+<<<<<<< HEAD
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from backend.app.models.user import Role
 from datetime import datetime
+=======
+>>>>>>> 0f26825 (replace project with the updated code)
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from backend.app.models.user import Role
 
+
+PASSWORD_REGEX = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
 
 class UserCreate(BaseModel):
     model_config = ConfigDict(regex_engine="python-re")
