@@ -3,10 +3,12 @@ from sqlalchemy import Boolean, Integer, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.db.base import Base
-from backend.app.models.theatre import Theatre
+from typing import TYPE_CHECKING
 from backend.app.models.show_enums import ShowLanguages, ShowFormat
 from backend.app.models.shows import Show
 
+if TYPE_CHECKING:
+    from backend.app.models.theatre import Theatre
 
 
 class Screen(Base):

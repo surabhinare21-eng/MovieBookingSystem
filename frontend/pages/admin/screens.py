@@ -50,7 +50,7 @@ def edit_screen_dialog(screen):
         submitted = st.form_submit_button(
             "Save Changes",
             type="primary",
-            use_container_width=True,
+            width=True,
         )
 
     if submitted:
@@ -93,7 +93,7 @@ def delete_screen_dialog(screen):
         "Confirm Delete",
         key=f"confirm_delete_screen_{screen_id}",
         type="primary",
-        use_container_width=True,
+        width=True,
     ):
         ok, data, _ = api(
             "DELETE",
@@ -109,7 +109,7 @@ def delete_screen_dialog(screen):
     if cancel_col.button(
         "Cancel",
         key=f"cancel_delete_screen_{screen_id}",
-        use_container_width=True,
+        width=True,
     ):
         st.rerun()
 
@@ -142,7 +142,7 @@ def seat_layout_dialog(screen):
                         f"{row_index}_{col_index}"
                     ),
                     disabled=True,
-                    use_container_width=True,
+                    width=True,
                 )
 
     st.info("SCREEN")
@@ -181,7 +181,7 @@ def screens_page():
             submitted = st.form_submit_button(
                 "Add Screen",
                 type="primary",
-                use_container_width=True,
+                width=True,
             )
 
         if submitted:
@@ -269,7 +269,7 @@ def screens_page():
                 if st.button(
                     "Edit",
                     key=f"edit_screen_{screen_id}",
-                    use_container_width=True,
+                    width=True,
                 ):
                     edit_screen_dialog(screen)
 
@@ -277,7 +277,7 @@ def screens_page():
                 if st.button(
                     "View Layout",
                     key=f"preview_screen_{screen_id}",
-                    use_container_width=True,
+                    width=True,
                 ):
                     seat_layout_dialog(screen)
 
@@ -285,6 +285,6 @@ def screens_page():
                 if st.button(
                     "Delete",
                     key=f"delete_screen_{screen_id}",
-                    use_container_width=True,
+                    width=True,
                 ):
                     delete_screen_dialog(screen)

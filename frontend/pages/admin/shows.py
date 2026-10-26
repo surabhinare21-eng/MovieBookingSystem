@@ -123,7 +123,7 @@ def shows_page():
             submitted = st.form_submit_button(
                 "Schedule show",
                 type="primary",
-                use_container_width=True,
+                width=True,
             )
 
         if submitted:

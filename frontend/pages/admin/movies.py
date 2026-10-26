@@ -98,7 +98,7 @@ def edit_movie_dialog(movie):
         save_changes = st.form_submit_button(
             "Save Changes",
             type="primary",
-            use_container_width=True,
+            width=True,
         )
 
     if save_changes:
@@ -197,7 +197,7 @@ def movies_page():
             submitted = st.form_submit_button(
                 "Add Movie",
                 type="primary",
-                use_container_width=True,
+                width="stretch",
             )
 
         if submitted:
@@ -320,14 +320,14 @@ def movies_page():
             if st.button(
                 "Edit",
                 key=f"edit_movie_{movie_id}",
-                use_container_width=True,
+                width=True,
             ):
                 edit_movie_dialog(movie)
         with columns[7]:
             if st.button(
                 "Delete",
                 key=f"delete_movie_{movie_id}",
-                use_container_width=True,
+                width=True,
             ):
                 ok, data, _ = api(
                     "DELETE",

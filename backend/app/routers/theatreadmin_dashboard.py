@@ -1,0 +1,49 @@
+from fastapi import APIRouter, Depends
+from backend.app.db.session import get_db
+
+from backend.app.models.movies import Movie
+from backend.app.models.screens import Screen
+from backend.app.models.shows import Show
+from backend.app.models.theatre import Theatre
+from backend.app.models.city import City
+
+from backend.app.services.admin_service import (
+    get_superadmin_total_movies,
+    get_superadmin_total_screens,
+    get_superadmin_total_shows,
+    get_theatre_name_admin,
+    get_city_name_admin,
+    get_city_list_admin,
+    get_screen_list,
+)
+
+router = APIRouter(prefix="/get_analytics_superadmin", tags=["Theatre Admin (ADMIN)"])
+
+@router.get("/total_movies")
+def get_total_movies(db = Depends(get_db)):
+    return get_superadmin_total_movies(db, Movie)
+    
+@router.get("/total_screens")
+def get_total_screens(admin_id: int, db = Depends(get_db)):
+    return get_superadmin_total_screens(admin_id, db, Screen)
+
+@router.get("/total_shows")
+def get_total_shows(admin_id: int, db = Depends(get_db)):
+    return get_superadmin_total_shows(admin_id, db, Screen, Show)
+    
+@router.get("/theatre_name")
+def get_theatre_name(admin_id: int, db = Depends(get_db)):
+    return get_theatre_name_admin(admin_id, db, Theatre)
+
+@router.get("/city_name")
+def get_city_name(admin_id: int, db = Depends(get_db)):
+    return get_city_name_admin(admin_id, db, Theatre, City)
+
+@router.get("/get_cities_list")
+def get_city_list(db = Depends(get_db)):
+    return get_city_list_admin(db, City)
+
+@router.get("/get_screens_list")
+def get_screen_list_admin(admin_id, db = Depends(get_db)):
+    return get_screen_list(admin_id, db, Screen)
+

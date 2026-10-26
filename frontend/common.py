@@ -29,9 +29,6 @@ def log_out(notice: str | None = None) -> None:
     st.session_state["token"] = None
     st.session_state["user"] = None
     st.session_state["notice"] = notice
-    for key in list(st.session_state.keys()):
-        if key.startswith("booking_"):
-            del st.session_state[key]
 
 
 # --------------------------------------------------
@@ -39,8 +36,11 @@ def log_out(notice: str | None = None) -> None:
 # --------------------------------------------------
 
 def api(method: str, path: str, **kwargs: Any):
-    """Call FastAPI using the configured URL and session token."""
-
+    """
+    Task: Injects a Access Token within the parameter unit and checks
+    the validation of the invalid or the expiration 
+    """
+    #method = POST, path = "/auth/login, **kwargs = json packet"
     token_override = kwargs.pop("token_override", None)
 
     token = (
@@ -49,10 +49,7 @@ def api(method: str, path: str, **kwargs: Any):
         else st.session_state.get("token")
     )
 
-    api_url = st.session_state.get(
-        "backend_url",
-        DEFAULT_API_URL,
-    )
+    api_url = DEFAULT_API_URL
 
     ok, data, code = api_call(
         method,

@@ -9,14 +9,15 @@ from pages.admin.auth import auth_screen
 from pages.admin.users import users_page
 from pages.admin.cities import cities_page
 from pages.admin.overview import overview_page
-from pages.admin.profile import profile_page, customer_home
+from pages.admin.profile import profile_page
 from pages.admin.screens import screens_page
 from pages.admin.shows import shows_page
 from pages.admin.movies import movies_page
-from pages.admin.theatre_admi import theatre_admins_page
+from pages.admin.theatre_admin import theatre_admins_page
 from pages.admin.theatres import theatres_page, my_theatre_page
-from pages.customer.flow import customer_flow
-
+from pages.customer.demo import demo_theatre_page
+from pages.admin.superadmin_dashboard import superadmin_dashboard
+from pages.admin.theateradmin_dashboard import theateradmin_dashboard
 
 # --------------------------------------------------
 # 1. Application configuration
@@ -145,7 +146,7 @@ if not user:
     auth_screen()
 
 elif user["role"] == "CUSTOMER":
-    customer_flow()
+    demo_theatre_page()
 
 
 elif user["role"] == "ADMIN":
@@ -160,6 +161,7 @@ elif user["role"] == "ADMIN":
         "Screens": screens_page,
         "Show Scheduling": shows_page,
         "My profile": profile_page,
+        "Admin Dashboard": theateradmin_dashboard
     })
 
 
@@ -179,9 +181,19 @@ elif user["role"] == "SUPER_ADMIN":
         "Movies": movies_page,
         "Users": users_page,
         "My profile": profile_page,
+        "Superadmin Dashboard":superadmin_dashboard
     })
     
 
 
 else:
     st.error(f"Unknown role: {user['role']}")
+    
+
+
+
+#for reference:
+#any pages are first imported then a common function is set that only takes the tabs to 
+#render eg movies cities and other tabs then according to the role we pass it to the 
+#specific functions
+

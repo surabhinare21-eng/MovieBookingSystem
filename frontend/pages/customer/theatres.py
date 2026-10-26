@@ -175,7 +175,7 @@ def theatres_page():
                     if st.button(
                         start_label,
                         key=f"select_show_{show['show_id']}",
-                        use_container_width=True,
+                        width=True,
                         help=details or None,
                     ):
                         st.session_state.booking_theatre_id = theatre_id

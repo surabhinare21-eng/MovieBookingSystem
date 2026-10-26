@@ -90,7 +90,7 @@ def verify_signup_email(payload: EmailVerification, db: Session = Depends(get_db
             detail="No pending registration found. Please sign up and request a new code.",
         )
 
-    if pending.expires_at < datetime.utcnow():
+    if pending.expires_at < datetime.now():
         db.delete(pending)
         db.commit()
         raise HTTPException(

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.db.base import Base
 from backend.app.models.city import City
+from backend.app.models.screens import Screen
 
 class Theatre(Base):
     __tablename__ = "theatres"
