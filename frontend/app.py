@@ -56,16 +56,6 @@ if "signup_success" not in st.session_state:
     st.session_state.signup_success = False
 
 
-# --------------------------------------------------
-# 3. Backend connection settings
-# --------------------------------------------------
-
-with st.sidebar.expander("Connection"):
-    st.text_input(
-        "Backend URL",
-        value=DEFAULT_API_URL,
-        key="backend_url",
-    )
 
 
 # --------------------------------------------------
@@ -90,7 +80,10 @@ if user:
 # 5. Application title and notifications
 # --------------------------------------------------
 
-st.title("Movie Ticket Booking System")
+st.markdown(
+    """<h1 style='text-align: center;'>Movie Ticket Booking System</h1>""",
+    unsafe_allow_html=True,
+)
 
 if st.session_state.notice:
     st.warning(st.session_state.notice)
