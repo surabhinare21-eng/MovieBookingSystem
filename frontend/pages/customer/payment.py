@@ -77,11 +77,7 @@ CHECKOUT_TEMPLATE = """
           showButton();
           return;
         }
-<<<<<<< HEAD
-        show("Payment successful. Your booking is being confirmed.", "ok");
-=======
         show("Payment successful! Return to the booking page and click Check payment status to see your ticket details.", "ok");
->>>>>>> 0f26825 (replace project with the updated code)
       } catch (e) {
         show("Could not confirm payment. Check your booking status before retrying.", "err");
         showButton();
@@ -151,8 +147,6 @@ HIDE_CHROME = """
 """
 
 
-<<<<<<< HEAD
-=======
 def _return_home() -> None:
     for key in (
         "payment_order", "payment_booking_id", "booking_lock_seats",
@@ -206,32 +200,12 @@ def watch_payment_status(booking_id: int):
 
     st.caption("Waiting for payment confirmation...")
 
->>>>>>> 0f26825 (replace project with the updated code)
 def payments_page() -> None:
     token = st.session_state.get("token")
     if not token:
         st.warning("Please log in before making a payment.")
         st.stop()
 
-<<<<<<< HEAD
-    locks = st.session_state.get("booking_lock_seats", [])
-    booking_id = locks[0].get("booking_id") if locks else None
-    if booking_id is None:
-        st.error("Your seat hold has expired or is missing. Please select seats again.")
-        return
-
-    order = st.session_state.get("payment_order")
-
-    # Step 1: create the order
-    if order is None:
-        st.title("💳 Booking Payment")
-        st.caption("Secure checkout powered by Razorpay.")
-        st.info("Your selected seats are held for 5 minutes.")
-        if st.button("Continue to payment", type="primary", use_container_width=True):
-            ok, response, status_code = api("POST", f"/payments/create-order/{booking_id}")
-            if not ok:
-                st.error(f"Could not create payment order (HTTP {status_code}): {response}")
-=======
     booking_id = st.session_state.get("payment_booking_id")
     locks = st.session_state.get("booking_lock_seats", [])
     if booking_id is None and locks:
@@ -257,24 +231,13 @@ def payments_page() -> None:
             ok, response, code = api("POST", f"/payments/create-order/{booking_id}")
             if not ok:
                 st.error(f"Could not create payment order (HTTP {code}): {response}")
->>>>>>> 0f26825 (replace project with the updated code)
                 return
             st.session_state["payment_order"] = response
             st.session_state["payment_booking_id"] = booking_id
             st.rerun()
-<<<<<<< HEAD
-        return
-
-    # Step 2: show only the Razorpay form
-    st.markdown(HIDE_CHROME, unsafe_allow_html=True)
-    render_checkout(order, token)
-
-
-=======
         if st.button("BACK TO SEAT SELECTION", use_container_width=True):
             _return_to_seats()
         return
 
     render_checkout(order, token)
     watch_payment_status(booking_id)
->>>>>>> 0f26825 (replace project with the updated code)

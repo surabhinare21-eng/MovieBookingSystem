@@ -45,6 +45,7 @@ def auth_screen():
                     )
 
                     if ok:
+                        st.session_state.theatre_id = data["theatre_id"]
                         st.session_state.token = token
                         st.session_state.user = profile
                         st.rerun()

@@ -53,6 +53,12 @@ def login_user(
     if user is None:
         raise ValueError("Invalid email or password.")
 
+    if user.role == "ADMIN":
+        theatre_id = user.theatre_id
+    else:
+        theatre_id = None
+        
+        
     password_matches, updated_hash = verify_password_and_update(
         password,
         user.hashed_password,
@@ -75,4 +81,5 @@ def login_user(
     return {
         "access_token": access_token,
         "token_type": "bearer",
+        "theatre_id": theatre_id
     }

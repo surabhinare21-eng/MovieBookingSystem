@@ -16,6 +16,8 @@ from pages.admin.movies import movies_page
 from pages.admin.theatre_admi import theatre_admins_page
 from pages.admin.theatres import theatres_page, my_theatre_page
 from pages.customer.flow import customer_flow
+from pages.admin.superadmin_dashboard import superadmin_dashboard_page
+from pages.admin.theatreadmin_dashboard import theatreadmin_dashboard_page
 
 
 
@@ -54,16 +56,6 @@ if "signup_success" not in st.session_state:
     st.session_state.signup_success = False
 
 
-
-# 3. Backend connection settings
-
-
-with st.sidebar.expander("Connection"):
-    st.text_input(
-        "Backend URL",
-        value=DEFAULT_API_URL,
-        key="backend_url",
-    )
 
 
 # 4. Sidebar user information and logout
@@ -166,6 +158,7 @@ elif user["role"] == "ADMIN":
         "Screens": screens_page,
         "Show Scheduling": shows_page,
         "My profile": profile_page,
+        "dashboard" : theatreadmin_dashboard_page
     })
 
 
@@ -185,6 +178,7 @@ elif user["role"] == "SUPER_ADMIN":
         "Movies": movies_page,
         "Users": users_page,
         "My profile": profile_page,
+        "Dashboard" : superadmin_dashboard_page
     })
     
 
