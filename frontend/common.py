@@ -15,10 +15,6 @@ ROLE_LABELS = {
 }
 
 
-# --------------------------------------------------
-# Session and notification helpers
-# --------------------------------------------------
-
 def flash(message: str) -> None:
     """Store a message to display after the next rerun."""
     st.session_state["flash"] = message
@@ -34,26 +30,12 @@ def log_out(notice: str | None = None) -> None:
             del st.session_state[key]
 
 
-# --------------------------------------------------
-# Backend API helper
-# --------------------------------------------------
 
 def api(method: str, path: str, **kwargs: Any):
     """Call FastAPI using the configured URL and session token."""
-
-    token_override = kwargs.pop("token_override", None)
-
-    token = (
-        token_override
-        if token_override is not None
-        else st.session_state.get("token")
-    )
-
-    api_url = st.session_state.get(
-        "backend_url",
-        DEFAULT_API_URL,
-    )
-
+    
+    token = st.session_state.get("token")
+    api_url = DEFAULT_API_URL
     ok, data, code = api_call(
         method,
         api_url,
@@ -72,10 +54,6 @@ def api(method: str, path: str, **kwargs: Any):
 
     return ok, data, code
 
-
-# --------------------------------------------------
-# Status helpers
-# --------------------------------------------------
 
 def status_color(value: str) -> str:
     """Return CSS styling for a status value."""
@@ -107,9 +85,6 @@ def status_md(
     )
 
 
-# --------------------------------------------------
-# Display helpers
-# --------------------------------------------------
 
 def show_table(
     rows: list[dict[str, Any]],
@@ -154,9 +129,6 @@ def status_field(
     st.markdown(status_md(is_active, off_word))
 
 
-# --------------------------------------------------
-# Search helper
-# --------------------------------------------------
 
 def matches(query: str, *values: Any) -> bool:
     """Perform case-insensitive search across multiple values."""

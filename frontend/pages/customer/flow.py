@@ -5,9 +5,14 @@ from pages.customer.movies import movies_page
 from pages.customer.theatres import theatres_page
 from pages.customer.seats import seats_page
 from pages.customer.payment import payments_page
+from pages.customer.my_bookings import my_bookings_page
 
 
 def customer_flow():
+    if st.session_state.get("customer_view") == "my_bookings":
+        my_bookings_page()
+        return
+
     step = st.session_state.get("booking_step") or "cities"
 
     if step in ("movies", "theatres", "seats") and not st.session_state.get("booking_city_id"):
@@ -24,15 +29,6 @@ def customer_flow():
     elif step == "theatres":
         theatres_page()
     elif step == "seats":
-        # This is a dedicated booking step/page; no timing-page controls are rendered here.
         seats_page()
     elif step == "payment":
         payments_page()
-        if st.button("Back to seat selection"):
-            st.session_state["booking_step"] = "seats"
-            st.rerun()
-        
-        
-        st.subheader("Payment")
-        st.info("Your seats are held for five minutes. Connect the payment workflow here.")
-

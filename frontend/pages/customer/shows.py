@@ -44,7 +44,7 @@ def shows_page():
             if st.button(
                 "Select this show",
                 key=f"select_show_{show_id}",
-                use_container_width=True,
+                width=True,
             ):
                 st.session_state["booking_show_id"] = show_id
                 st.session_state["booking_seat_ids"] = []

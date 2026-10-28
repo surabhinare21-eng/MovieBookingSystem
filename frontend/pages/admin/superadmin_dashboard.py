@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 
-def superadmin_dashboard_page():
+def superadmin_dashboard():
     st.title("SuperAdmin Dashboard")
 
     ok, data, _ = api("GET", "/get_analytics/superadmin")
@@ -38,14 +38,11 @@ def superadmin_dashboard_page():
     with m_col5:
         st.metric(label="Total Movies", value=data.get("total_movies", 0))
 
+    
+
     st.markdown("---")
 
     ok, map_data, _ = api("GET", "/get_analytics/map_data")
-    if isinstance(map_data, str):
-        try:
-            map_data = json.loads(map_data)
-        except json.JSONDecodeError:
-            map_data = None
 
     st.subheader("Geographic Theatre Distribution")
     if ok and isinstance(map_data, list) and len(map_data) > 0:
@@ -253,5 +250,5 @@ def superadmin_dashboard_page():
             st.info("No registration or timeline data history records present.")
     else:
         st.error("Failed to fetch timeline line graph metrics from backend.")
-
-
+        
+    st.markdown("---")

@@ -7,6 +7,7 @@ from backend.app.models.movies import Movie
 from backend.app.models.screens import Screen
 from backend.app.models.theatre import Theatre
 from backend.app.models.user import User
+from backend.app.models.payment import Payment
 from backend.app.services.admin_service import (
     get_city_coordinates,
     get_customer_admin_para,

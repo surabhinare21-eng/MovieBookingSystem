@@ -1,4 +1,4 @@
-from sqlalchemy import select , func, Date, case
+from sqlalchemy import select , func, Date, case, cast
 
 from backend.app.core.security import hash_password
 from backend.app.models.theatre import Theatre
@@ -8,19 +8,13 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderServiceError
 
 def create_city(db, name: str) -> City:
-    # 1. Standardize the name input first
     clean_name = name.strip()
-
-    # 2. Check for existence in the database
     exists = db.scalar(select(City).where(City.name == clean_name))
     if exists:
         raise ValueError("A City with this name already exists.")
-
-    # 3. Initialize Nominatim
     geolocator = Nominatim(user_agent="my_geocoder_app")
 
     try:
-        # 4. Attempt to find the coordinates
         city_coordinates = geolocator.geocode(clean_name)
 
         if not city_coordinates:
@@ -28,7 +22,6 @@ def create_city(db, name: str) -> City:
                 f"Could not find coordinates for the city: {clean_name}"
             )
 
-        # 5. Correctly instantiate the SQLAlchemy model using keyword arguments
         city = City(
             name=clean_name,
             longitude=city_coordinates.longitude,
@@ -41,7 +34,7 @@ def create_city(db, name: str) -> City:
         return city
 
     except GeocoderServiceError:
-        db.rollback()  # Rollback if an error happens during the process
+        db.rollback()  
         raise RuntimeError("Geocoding service is temporarily unavailable.")
 
 def set_city_active(db,city_id:int,is_active:bool)-> City:
@@ -84,13 +77,11 @@ def create_theatre(db, name, city, address) -> Theatre:
 
 
 def update_theatre(db, theatre_id, name, city, address) -> Theatre:
-    # 1. Find the existing theatre
     theatre = db.get(Theatre, theatre_id)
 
     if theatre is None:
         raise LookupError("Theatre not found.")
 
-    # 2. Validate the city
     city_record = db.scalar(
         select(City).where(
             City.name == city.strip(),
@@ -211,18 +202,23 @@ def get_total_analytics_count_superadmin(db, Users, Theatres, Cities, Movie):
 
     statement_total_movies = select(func.count(Movie.movie_id))
     total_movies = db.scalar(statement_total_movies)
+    
         
     return {
         "total_customers_count": total_customers,
         "total_theatre_admin_count": total_theatre_admin,
         "total_theatre_count": total_theatre,
         "total_cities": total_cities,
-        "total_movies": total_movies
+        "total_movies": total_movies,
     }
 
 def get_city_coordinates(db, Cities):
   statement_city_coordinates = select(Cities.longitude, Cities.latitude)
-  city_coordinates = db.execute(statement_city_coordinates).mappings().all()
+  city_coordinates = db.execute(statement_city_coordinates).mappings().all() #row mapping object
+  
+  """
+  a dictionary-like, read-only interface that represents a single result row from a database query
+  """
   
   
   return [dict(row) for row in city_coordinates]
@@ -246,6 +242,7 @@ def graphs_screen_theatre(db, Screen, Theatre):
         .group_by(Theatre.name)
         .all()
     )
+    
     
     analytics_payload = {row.name: row.screen_count for row in results}
     return analytics_payload
@@ -365,29 +362,59 @@ def get_screen_list(admin_id, db, Screen):
     
     return result if result else "No screen added"
 
-def get_screen_show(admin_id, db, Screen, Show, Movies):
+
+def get_top_movies_list(admin_id, db, Movie, Booking, Show, Screen, Theatre):
+    """
+    Queries the database for best-selling movies restricted to theatres 
+    managed by a specific admin_id. Returns a Streamlit-compatible dictionary.
+    """
     statement = (
-    select(
-        Screen.screen_name,
-        Movies.movie_title,
-        Movies.movie_language,
-        Movies.movie_duration
+        select(
+            Movie.movie_title.label("movie_title"),
+            func.sum(Booking.total_amount).label("total_revenue")
+        )
+        .join(Show, Movie.movie_id == Show.movie_id)
+        .join(Booking, Show.show_id == Booking.show_id)
+        .join(Screen, Show.screen_id == Screen.screen_id)
+        .join(Theatre, Screen.theatre_id == Theatre.theatre_id)
+        .join(User, Theatre.city_id == User.user_id) 
+        .where(
+            Booking.status == 'PAID',
+            User.user_id == admin_id
+        )
+        .group_by(Movie.movie_id, Movie.movie_title)
+        .order_by(func.sum(Booking.total_amount).desc())
     )
-    .join(Show, Screen.screen_id == Show.screen_id)
-    .join(Movies, Show.movie_id == Movies.movie_id)
-    .where(Screen.theatre_id == admin_id)
+    
+    results = db.execute(statement).all()
+    
+    return {
+        "Category": [row.movie_title for row in results],
+        "Value": [float(row.total_revenue) for row in results]
+    }
+    
+def get_shows_sold_per_movie(admin_id, db, Movie, Show, Booking, Screen, Theatre, User):
+    statement = (
+        select(
+            Movie.movie_title.label("movie_title"),
+            func.count(Show.show_id).label("shows_count")
+        )
+        .join(Show, Movie.movie_id == Show.movie_id)
+        .join(Booking, Show.show_id == Booking.show_id)
+        .join(Screen, Show.screen_id == Screen.screen_id)
+        .join(Theatre, Screen.theatre_id == Theatre.theatre_id)
+        .join(User, Theatre.city_id == User.user_id) 
+        .where(
+            Booking.status == 'PAID',
+            User.user_id == admin_id
+        )
+        .group_by(Movie.movie_id, Movie.movie_title)
+        .order_by(func.count(Show.show_id).desc())
     )
-
-    rows = db.execute(statement).mappings().all()
-
-    result = [
-        {
-            "Screen Name": row["screen_name"],
-            "Movie Title": row["movie_title"],
-            "Language": row["movie_language"],
-            "Duration": row["movie_duration"]
-        }
-        for row in rows
-    ]
-
-    return result if result else "No shows found"
+    
+    results = db.execute(statement).all()
+    
+    return {
+        "Category": [row.movie_title for row in results],
+        "Value": [int(row.shows_count) for row in results]
+    }

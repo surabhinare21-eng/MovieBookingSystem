@@ -16,12 +16,8 @@ from pages.admin.movies import movies_page
 from pages.admin.theatre_admi import theatre_admins_page
 from pages.admin.theatres import theatres_page, my_theatre_page
 from pages.customer.flow import customer_flow
-from pages.admin.superadmin_dashboard import superadmin_dashboard_page
-from pages.admin.theatreadmin_dashboard import theatreadmin_dashboard_page
-
-
-
-#Application configuration
+from pages.admin.superadmin_dashboard import superadmin_dashboard
+from pages.admin.theatreadmin_dashboard import theatreadmin_dashboard
 
 
 st.set_page_config(
@@ -29,7 +25,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# Hide Streamlit's automatic multipage navigation
+
 st.markdown(
     """
     <style>
@@ -43,8 +39,6 @@ st.markdown(
 
 
 
-# 2. Initialize session state
-
 for key in ("token", "user", "flash", "notice"):
     if key not in st.session_state:
         st.session_state[key] = None
@@ -55,10 +49,6 @@ if "pending_signup_email" not in st.session_state:
 if "signup_success" not in st.session_state:
     st.session_state.signup_success = False
 
-
-
-
-# 4. Sidebar user information and logout
 
 
 user = st.session_state.user
@@ -76,10 +66,8 @@ if user:
 
 
 
-# 5. Application title and notifications
 
-
-st.title("Movie Ticket Booking System")
+st.markdown("<h1 style='text-align: center;'> CineView</h1>",unsafe_allow_html=True,)
 
 if st.session_state.notice:
     st.warning(st.session_state.notice)
@@ -91,7 +79,6 @@ if st.session_state.flash:
 
 
 
-# 6. Reusable tab renderer
 
 
 
@@ -126,9 +113,6 @@ def render_tabs(screens: dict) -> None:
 
 
 
-# 7. Role-based routing
-
-
 user = st.session_state.user
 
 if not user:
@@ -158,7 +142,7 @@ elif user["role"] == "ADMIN":
         "Screens": screens_page,
         "Show Scheduling": shows_page,
         "My profile": profile_page,
-        "dashboard" : theatreadmin_dashboard_page
+        "dashboard" : theatreadmin_dashboard
     })
 
 
@@ -178,10 +162,9 @@ elif user["role"] == "SUPER_ADMIN":
         "Movies": movies_page,
         "Users": users_page,
         "My profile": profile_page,
-        "Dashboard" : superadmin_dashboard_page
+        "Dashboard" : superadmin_dashboard
     })
     
-
 
 else:
     st.error(f"Unknown role: {user['role']}")

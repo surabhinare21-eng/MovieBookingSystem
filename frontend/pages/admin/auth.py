@@ -37,22 +37,22 @@ def auth_screen():
                     st.error(data)
                 else:
                     token = data["access_token"]
+                    st.session_state.token = token
 
                     ok, profile, _ = api(
                         "GET",
                         "/auth/me",
-                        token_override=token,
                     )
 
                     if ok:
                         st.session_state.theatre_id = data["theatre_id"]
-                        st.session_state.token = token
                         st.session_state.user = profile
                         st.rerun()
                     else:
+                        st.session_state.token = None
                         st.error(profile)
 
-        # ---------------- SIGNUP / OTP ----------------
+        
         with signup_tab:
             st.caption(
                 "New accounts are customer accounts. "
@@ -108,7 +108,7 @@ def auth_screen():
 
                 with st.form("signup_form"):
                     username = st.text_input(
-                        "Username",
+                        "Name",
                         key="signup_username",
                     )
                     email = st.text_input(

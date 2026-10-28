@@ -133,7 +133,6 @@ def render_checkout(order: dict, token: str) -> None:
         "apiBase": st.session_state.get("backend_url", DEFAULT_BACKEND_URL).rstrip("/"),
         "token": token,
     }
-    # Escape "</" so values can never close the <script> tag early.
     config_js = json.dumps(config).replace("</", "<\\/")
     # Razorpay's modal renders inside this iframe, so it needs enough height.
     components.html(CHECKOUT_TEMPLATE.replace("__CONFIG__", config_js), height=720)

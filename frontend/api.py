@@ -31,7 +31,6 @@ def _error_text(body, status_code: int) -> str:
 
     return f"Request failed (HTTP {status_code})."
 
-
 def call(method, api_url, path, token=None, json=None, params=None):
     """
     Call the backend and return (ok, data_or_error_text, status_code).

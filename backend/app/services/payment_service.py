@@ -64,10 +64,11 @@ def create_payment_order(
             }
         )
     except Exception as exc:
-        raise HTTPException(
-            status_code=502,
-            detail="Unable to create Razorpay order",
-        ) from exc
+            print("Razorpay error:", repr(exc))
+            raise HTTPException(
+                status_code=502,
+                detail=f"Unable to create Razorpay order: {exc}",
+            ) from exc
 
     payment = Payment(
         booking_id=booking.booking_id,
