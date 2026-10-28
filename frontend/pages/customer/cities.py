@@ -21,13 +21,12 @@ def cities_page():
         st.info("No cities are available yet. Please check back soon.")
         return
 
-    # matches() casefolds both sides, so the search is case-insensitive
     filtered = [c for c in cities if matches(search, c["name"])]
     if not filtered:
         st.warning(f'No city found for "{search.strip()}".')
         return
 
-    per_row = 4
+    per_row = 3
     for start in range(0, len(filtered), per_row):
         columns = st.columns(per_row)
         for column, city in zip(columns, filtered[start:start + per_row]):

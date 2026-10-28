@@ -40,7 +40,7 @@ def movie_details_dialog(movie):
         st.write(movie["movie_description"])
 
         if st.button("Book show", type="primary",
-                     key=f"book_show_{movie['movie_id']}", width="stretch"):
+                     key=f"book_show_{movie['movie_id']}", use_container_width=True):
             st.session_state["booking_movie_id"] = movie["movie_id"]
             st.session_state["booking_step"] = "theatres"
             st.rerun()
@@ -52,7 +52,7 @@ def movie_card(movie, key_prefix):
         st.markdown(f"**{movie['movie_title']}**")
         st.caption(f"{movie.get('movie_genre') or NO_GENRE} · {str(movie['movie_language']).title()}")
         st.caption(f"{movie['movie_rating']}/10 · {format_duration(movie.get('movie_duration'))}")
-        if st.button("View details", key=f"{key_prefix}_view_{movie['movie_id']}", width="stretch"):
+        if st.button("View details", key=f"{key_prefix}_view_{movie['movie_id']}", use_container_width=True):
             movie_details_dialog(movie)
 
 
@@ -70,7 +70,7 @@ def movies_page():
 
     title_col, change_col = st.columns([4, 1])
     title_col.subheader(f"Movies in {city_name}")
-    if change_col.button("Change city", width="stretch"):
+    if change_col.button("Change city", use_container_width=True):
         st.session_state["booking_step"] = "cities"
         st.rerun()
 

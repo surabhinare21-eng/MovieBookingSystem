@@ -27,6 +27,9 @@ def edit_movie_dialog(movie):
     """Display a popup for editing an existing movie."""
 
     movie_id = movie["movie_id"]
+   
+    
+   
 
     st.caption(f"Editing: {movie['movie_title']}")
 
@@ -53,7 +56,8 @@ def edit_movie_dialog(movie):
             "Description",
             value=movie["movie_description"],
         )
-
+        
+    
         language = st.selectbox(
             "Language",
             LANGUAGES,
@@ -65,6 +69,7 @@ def edit_movie_dialog(movie):
             MOVIE_STATUSES,
             index=MOVIE_STATUSES.index(current_status),
         )
+       
 
         poster_url = st.text_input(
             "Poster URL",
@@ -247,8 +252,22 @@ def movies_page():
     # --------------------------------------------------
     # ALL MOVIES
     # --------------------------------------------------
-    st.subheader("All Movies")
+    header_col, button_col = st.columns([5, 1])
 
+    with header_col:
+        st.subheader("All Movies")
+
+    with button_col:
+        if st.button(
+            "View" if st.session_state.get("show_movies_list", False) else "Hide",
+            key="toggle_movies_list",
+        ):
+            st.session_state.show_movies_list = (
+                not st.session_state.get("show_movies_list", False)
+            )
+
+    if not st.session_state.get("show_movies_list", False):
+        return
     ok, movies, _ = api("GET", "/movies/")
 
     if not ok:

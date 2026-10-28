@@ -10,3 +10,4 @@ pydantic-extra-types==2.11.1
 pydantic==2.14.0
 phonenumbers
 pydantic[email]
+razorpay

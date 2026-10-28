@@ -5,8 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import engine
 from backend.app.db.base import Base
-from backend.app.models.user import User       
-from backend.app.models.theatre import Theatre  
 
 from backend.app.routers.auth import router as auth_router
 from backend.app.routers.root_admin import router as root_admin_router
@@ -22,13 +20,15 @@ from backend.app.routers.public_screen import (
     router as public_screen_router,
 )
 from backend.app.routers.public_show import router as public_show_router
-
-    
-
+from backend.app.routers.seat import router as seat_router
+from backend.app.routers.payment import router as payment_router
+from backend.app.routers.superadmin_dashboard import router as superadmin_router
+from backend.app.routers.theatreadmin_dashboard import router as theatreadmin_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Importing the models above registers them with Base.metadata.
+    # create all the database tables created by orm model
     Base.metadata.create_all(bind=engine)
     print("Database tables created successfully.")
 
@@ -60,6 +60,10 @@ app.include_router(public_screen_router)
 app.include_router(public_show_router)
 app.include_router(public_city_router)
 app.include_router(public_movie_router)
+app.include_router(seat_router)
+app.include_router(payment_router)
+app.include_router(superadmin_router)
+app.include_router(theatreadmin_router)
 
 
 @app.get("/")
